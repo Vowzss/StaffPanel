@@ -11,6 +11,6 @@ print("Successfully loaded " .. ADDON_CONFIG.name .. " ver: " .. ADDON_CONFIG.ve
 
 hook.Add("PlayerSay", "staffPanelPlayerSay", function(sender, text, teamChat)
     if text == "!admin" then 
-        displayPrefix()
+        staffLogger("Staff mode turned on!", Color(255, 0, 0, 200))
     end
 end)

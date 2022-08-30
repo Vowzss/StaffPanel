@@ -1,9 +1,12 @@
 ADDON_CONFIG = {
     ["name"] = "StaffPanel",
     ["author"] = "NoIdeaIndustry",
-    ["version"] = "1.0.0"
+    ["version"] = "1.0.0",
+
+    ["logger"] = "[Logger - StaffPanel]",
+    ["color"] = Color(100, 220, 100, 200)
 }
 
-function displayPrefix()
-    print("[" .. ADDON_CONFIG.name .. "]")
+function staffLogger(message, color)
+    MsgC(ADDON_CONFIG.color, ADDON_CONFIG.logger, color, " " .. message .. "\n")
 end
