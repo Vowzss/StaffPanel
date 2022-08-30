@@ -1,25 +1,38 @@
 include("autorun/sh_staffPanel.lua")
 
-local function drawPanel()
+function HOTANIMATIONS.OpenMenu()
     local screenWidth, screenHeight = ScrW(), ScrH()
     local hudWidth, hudHeight = screenWidth*.25, screenHeight*.25
+    local animTime, animeDelay, animeEase = 1, 0, 0.1
 
-    surface.SetDrawColor(52,52,52,255)
-    surface.DrawRect(screenWidth/2 - hudWidth/2, screenHeight/2 - hudHeight/2, hudWidth, hudHeight)
+    if IsValid(HOTANIMATIONS.Menu) then
+        HOTANIMATIONS.Menu:Remove()
+    end
 
-    surface.SetDrawColor(210,144,52,255)
-    surface.DrawRect(screenWidth/2 - hudWidth/2, screenHeight/2 - hudHeight/2, hudWidth, hudHeight/8)
-end
-hook.Add("HUDPaint", "staffPanelDrawPanel", drawPanel)
+    HOTANIMATIONS.Menu = vgui.Create("DFrame")
+    HOTANIMATIONS.Menu:SetTitle("StaffPanel - Manager")
+    HOTANIMATIONS.Menu:MakePopup(true)
+    HOTANIMATIONS.Menu:SetSize(0, 0)
+    HOTANIMATIONS.Menu:Center()
 
-local function togglePanel(toggle)
-    if toggle then
-        staffLogger("Openning Staff Panel!", Color(0, 255, 0, 200))
-    else
-        staffLogger("Closing Staff Panel!", Color(255, 0, 0, 200))
+    HOTANIMATIONS.Menu.Paint = function(me, width, height)
+        surface.SetDrawColor(52,52,52,255)
+        surface.DrawRect(0, 0, width, height)
+
+        surface.SetDrawColor(210,144,52,255)
+        surface.DrawRect(0, 0, width, height/11)
+    end
+
+    local isAnimating = true;
+    HOTANIMATIONS.Menu:SizeTo(hudWidth, hudHeight, animTime, animDelay, animEase, function() 
+        isAnimating = false 
+    end)
+
+    HOTANIMATIONS.Menu.Think = function(me) 
+        if isAnimating then
+            me:Center()
+        end
     end
 end
 
-hook.Add("StaffPanelShow", "staffPanelOpenPanel", togglePanel(true))
-
-hook.Add("StaffPanelHide", "staffPanelClosePanel", togglePanel(false))
+concommand.Add("openStaffPanel", HOTANIMATIONS.OpenMenu)

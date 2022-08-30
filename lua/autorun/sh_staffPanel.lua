@@ -10,3 +10,5 @@ ADDON_CONFIG = {
 function staffLogger(message, color)
     MsgC(ADDON_CONFIG.color, ADDON_CONFIG.logger, color, " " .. message .. "\n")
 end
+
+HOTANIMATIONS = {}
