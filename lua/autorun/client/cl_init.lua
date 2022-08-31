@@ -13,38 +13,15 @@ local function keyHandler(keyCode)
     if (keyCode == KEY_O and UnPredictedCurTime() > prevTime + 0.05) then
         prevTime = UnPredictedCurTime()
         if(staffPanelOpenned) then
-            STAFF_PANEL.CloseMenu()
+            STAFF_PANEL.CloseFrame()
         else
-            STAFF_PANEL.OpenMenu()
+            STAFF_PANEL.OpenFrame()
         end
     end
 end
 
-function STAFF_PANEL.CreateMenu()
-    STAFF_PANEL.Menu = vgui.Create("DFrame")
-    STAFF_PANEL.Menu:SetTitle("StaffPanel - Manager")
-    STAFF_PANEL.Menu:MakePopup(true)
-    STAFF_PANEL.Menu:SetDraggable(true)
-    STAFF_PANEL.Menu:SetBackgroundBlur(true)
-    STAFF_PANEL.Menu:SetScreenLock(true)
-    STAFF_PANEL.Menu:SetDeleteOnClose(true)
-
-    STAFF_PANEL.Menu:SetSize(0, 0)
-    STAFF_PANEL.Menu:Center()
-end
-
-function STAFF_PANEL.DrawMenu()
-    STAFF_PANEL.Menu.Paint = function(this, width, height)
-        surface.SetDrawColor(52,52,52,255)
-        surface.DrawRect(0, 0, width, height)
-
-        surface.SetDrawColor(210,144,52,255)
-        surface.DrawRect(0, 0, width, height/11)
-    end
-end
-
-function STAFF_PANEL.DisplayButtons()
-    toggleStaffModeButton = STAFF_PANEL.Menu:Add("DButton")
+function STAFF_PANEL.DisplayFrameButtons()
+    toggleStaffModeButton = STAFF_PANEL.Frame:Add("DButton")
     toggleStaffModeButton:Dock(TOP)
     toggleStaffModeButton:SetText("")
     toggleStaffModeButton.isActive = false 
@@ -67,21 +44,23 @@ function STAFF_PANEL.DisplayButtons()
         net.SendToServer()
 
         if(staffModeEnabled) then
-            STAFF_PANEL.Menu:SetTitle("StaffPanel - Manager | [Enabled]")
+            STAFF_PANEL.Frame:SetTitle("StaffPanel - Manager | [Enabled]")
         else
-            STAFF_PANEL.Menu:SetTitle("StaffPanel - Manager | [Disabled]")
+            STAFF_PANEL.Frame:SetTitle("StaffPanel - Manager | [Disabled]")
         end
     end
 end
 
-function STAFF_PANEL.HandleResize(height)
-    if (isAnimating) then
-        this:Center()
+function STAFF_PANEL.HandleFrameResize(height, frame)
+    frame.OnSizeChanged = function(this, width, height) 
+        if (isAnimating) then
+            this:Center()
+        end
+        toggleStaffModeButton:SetTall(height * 0.1)
     end
-    toggleStaffModeButton:SetTall(height * 0.1)
 end
 
-function STAFF_PANEL.HandleAnimation(width, height, frame)
+function STAFF_PANEL.HandleFrameAnimation(width, height, frame)
     local animTime, animeDelay, animeEase = 1, 0, 0.2
 
     local isAnimating = true;
@@ -97,42 +76,58 @@ function STAFF_PANEL.HandleAnimation(width, height, frame)
     end
 end
 
-function STAFF_PANEL.OpenMenu()
-    chatLogger(LocalPlayer(), "Openning Staff Panel!", Color(0,255,0))
-    staffPanelOpenned = true
-
-    local screenWidth, screenHeight = ScrW(), ScrH()
-    local hudWidth, hudHeight = screenWidth*.25, screenHeight*.25
-    local animTime, animeDelay, animeEase = 1, 0, 0.2
-
-    STAFF_PANEL.CreateMenu()
-    STAFF_PANEL.DrawMenu()
-
-    STAFF_PANEL.HandleAnimation(hudWidth, hudHeight, STAFF_PANEL.Menu)
-
-    STAFF_PANEL.Menu.OnSizeChanged = function(this, width, height) 
-        STAFF_PANEL.HandleResize(height)
-    end
-
-    STAFF_PANEL.DisplayButtons()
-
-    STAFF_PANEL.Menu.OnKeyCodePressed = function(self, key) 
+function STAFF_PANEL.HandleFrameKeys(frame)
+    frame.OnKeyCodePressed = function(self, key) 
         keyHandler(key) 
     end
 end
-concommand.Add("openStaffPanel", STAFF_PANEL.OpenMenu)
 
-function STAFF_PANEL.CloseMenu()
+function STAFF_PANEL.CreateFrame()
+    STAFF_PANEL.Frame = vgui.Create("DFrame")
+    STAFF_PANEL.Frame:SetTitle("StaffPanel - Manager")
+    STAFF_PANEL.Frame:MakePopup(true)
+    STAFF_PANEL.Frame:SetDraggable(true)
+    STAFF_PANEL.Frame:SetBackgroundBlur(true)
+    STAFF_PANEL.Frame:SetScreenLock(true)
+    STAFF_PANEL.Frame:SetDeleteOnClose(true)
+
+    STAFF_PANEL.Frame:SetSize(0, 0)
+    STAFF_PANEL.Frame:Center()
+end
+
+function STAFF_PANEL.DrawFrame()
+    STAFF_PANEL.Frame.Paint = function(this, width, height)
+        surface.SetDrawColor(52,52,52,255)
+        surface.DrawRect(0, 0, width, height)
+
+        surface.SetDrawColor(210,144,52,255)
+        surface.DrawRect(0, 0, width, height/11)
+    end
+end
+
+function STAFF_PANEL.OpenFrame()
+    chatLogger(LocalPlayer(), "Openning Staff Panel!", Color(0,255,0))
+    staffPanelOpenned = true
+
+    STAFF_PANEL.CreateFrame()
+    STAFF_PANEL.DrawFrame()
+
+    STAFF_PANEL.DisplayFrameButtons()
+
+    STAFF_PANEL.HandleFrameAnimation(ScrW()*0.25, ScrH()*0.25, STAFF_PANEL.Frame)
+    STAFF_PANEL.HandleFrameResize(height, STAFF_PANEL.Frame)
+    STAFF_PANEL.HandleFrameKeys(STAFF_PANEL.Frame)
+end
+concommand.Add("openStaffPanel", STAFF_PANEL.OpenFrame)
+
+function STAFF_PANEL.CloseFrame()
     chatLogger(LocalPlayer(), "Closing Staff Panel!", Color(255,0,0))
     staffPanelOpenned = false
 
-    STAFF_PANEL.HandleAnimation(0, 0, STAFF_PANEL.Menu)
-
-    STAFF_PANEL.Menu.OnSizeChanged = function(this, width, height) 
-        STAFF_PANEL.HandleResize(height)
-    end
+    STAFF_PANEL.HandleFrameAnimation(0, 0, STAFF_PANEL.Frame)
+    STAFF_PANEL.HandleFrameResize(height, STAFF_PANEL.Frame)
 end
-concommand.Add("closeStaffPanel", STAFF_PANEL.CloseMenu)
+concommand.Add("closeStaffPanel", STAFF_PANEL.CloseFrame)
 
 function chatLogger(ply, message, color)
     chat.AddText(ADDON_CONFIG.color, ADDON_CONFIG.logger, color, " " .. message)
