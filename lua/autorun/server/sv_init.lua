@@ -11,8 +11,8 @@ print("Successfully loaded " .. ADDON_CONFIG.name .. " ver: " .. ADDON_CONFIG.ve
 
 local staffModeEnabled = false
 
-local function toggleStaffMode(ply)
-    if ply:HasGodMode() then return end
+function toggleStaffMode(ply)
+    if (ply:HasGodMode()) then return end
 
     staffModeEnabled = true
     ply:GodEnable()
@@ -23,8 +23,8 @@ local function toggleStaffMode(ply)
     net.SendToServer()
 end
 
-local function unToggleStaffMode(ply)
-    if not ply:HasGodMode() then return end
+function unToggleStaffMode(ply)
+    if (not ply:HasGodMode()) then return end
 
     staffModeEnabled = false
     ply:GodDisable()
@@ -42,7 +42,7 @@ util.AddNetworkString("SP_NET_SV_TurnStaffMode")
 net.Receive("SP_NET_SV_TurnStaffMode", function(len, ply)
     local active = net.ReadBool()
 
-    if active then 
+    if (active) then 
         toggleStaffMode(ply)
     else 
         unToggleStaffMode(ply)
