@@ -4,11 +4,11 @@ ADDON_CONFIG = {
     ["version"] = "1.0.0",
 
     ["logger"] = "[Logger - StaffPanel]",
-    ["color"] = Color(100, 220, 100, 200)
+    ["color"] = Color(210,144,52)
 }
 
-function staffLogger(message, color)
+function consoleLogger(message, color)
     MsgC(ADDON_CONFIG.color, ADDON_CONFIG.logger, color, " " .. message .. "\n")
 end
 
-HOTANIMATIONS = {}
+STAFF_PANEL = {}
