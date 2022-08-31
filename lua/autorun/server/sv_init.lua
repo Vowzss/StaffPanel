@@ -9,7 +9,7 @@ print()
 
 print("Successfully loaded " .. ADDON_CONFIG.name .. " ver: " .. ADDON_CONFIG.version)
 
-staffModeEnabled = false
+local staffModeEnabled = false
 
 function toggleStaffMode(ply)
     if (ply:HasGodMode()) then return end
@@ -23,7 +23,7 @@ function toggleStaffMode(ply)
     net.SendToServer()
 end
 
-function unToggleStaffMode(ply)
+local function unToggleStaffMode(ply)
     if (not ply:HasGodMode()) then return end
 
     staffModeEnabled = false

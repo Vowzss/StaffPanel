@@ -7,11 +7,28 @@ surface.CreateFont("Roboto", {
 })
 
 local staffPanelOpenned = false
+local prevTime = 0
+
+local function keyHandler(keyCode)
+    if (keyCode == KEY_O and UnPredictedCurTime() > prevTime + 0.05) then
+        prevTime = UnPredictedCurTime()
+        if(staffPanelOpenned) then
+            STAFF_PANEL.CloseMenu()
+        else
+            STAFF_PANEL.OpenMenu()
+        end
+    end
+end
 
 function STAFF_PANEL.CreateMenu()
     STAFF_PANEL.Menu = vgui.Create("DFrame")
     STAFF_PANEL.Menu:SetTitle("StaffPanel - Manager")
     STAFF_PANEL.Menu:MakePopup(true)
+    STAFF_PANEL.Menu:SetDraggable(true)
+    STAFF_PANEL.Menu:SetBackgroundBlur(true)
+    STAFF_PANEL.Menu:SetScreenLock(true)
+    STAFF_PANEL.Menu:SetDeleteOnClose(true)
+
     STAFF_PANEL.Menu:SetSize(0, 0)
     STAFF_PANEL.Menu:Center()
 end
@@ -92,21 +109,16 @@ function STAFF_PANEL.OpenMenu()
         STAFF_PANEL.HandleResize(height)
     end
 
-    STAFF_PANEL.Menu.OnClose = function()
-        STAFF_PANEL.CloseMenu()
+    STAFF_PANEL.Menu.OnKeyCodePressed = function(self, key) 
+        keyHandler(key) 
     end
-
-    function DFrame:OnKeyCodePressed(...) 
-        local keyCode = ...
-        print(keyCode)
-        getKeyPressed(keyCode)
-	end
 end
 concommand.Add("openStaffPanel", STAFF_PANEL.OpenMenu)
 
 function STAFF_PANEL.CloseMenu()
     staffPanelOpenned = false
     chatLogger(LocalPlayer(), "Closing Staff Panel!", Color(255,0,0))
+    STAFF_PANEL.Menu:Close()
 end
 concommand.Add("closeStaffPanel", STAFF_PANEL.CloseMenu)
 
@@ -114,18 +126,10 @@ function chatLogger(ply, message, color)
     chat.AddText(ADDON_CONFIG.color, ADDON_CONFIG.logger, color, " " .. message)
 end
 
-local function getKeyPressed(keyCode)
-    if (keyCode == KEY_O and IsFirstTimePredicted()) then
-        if(staffPanelOpenned) then
-            STAFF_PANEL.CloseMenu()
-        else
-            STAFF_PANEL.OpenMenu()
-        end
-    end
-end
-
 hook.Add("PlayerButtonDown", "SP_HK_BUTTON_DOWN", function(ply, keyCode)
-	getKeyPressed(keyCode)
+    if(IsFirstTimePredicted()) then
+	    keyHandler(keyCode)
+    end
 end)
 
 net.Receive("SP_NET_CL_StaffModeOn", function(len, ply)
