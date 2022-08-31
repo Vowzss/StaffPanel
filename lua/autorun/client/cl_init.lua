@@ -81,33 +81,40 @@ function STAFF_PANEL.HandleResize(height)
     toggleStaffModeButton:SetTall(height * 0.1)
 end
 
+function STAFF_PANEL.HandleAnimation(width, height, frame)
+    local animTime, animeDelay, animeEase = 1, 0, 0.2
+
+    local isAnimating = true;
+    frame:SizeTo(width, height, animTime, animDelay, animEase, function() 
+        isAnimating = false
+        if(width == 0 and height == 0) then frame:Close() end
+    end)
+
+    frame.Think = function(this) 
+        if (isAnimating) then
+            this:Center()
+        end
+    end
+end
+
 function STAFF_PANEL.OpenMenu()
     chatLogger(LocalPlayer(), "Openning Staff Panel!", Color(0,255,0))
     staffPanelOpenned = true
 
     local screenWidth, screenHeight = ScrW(), ScrH()
     local hudWidth, hudHeight = screenWidth*.25, screenHeight*.25
-    local animTime, animeDelay, animeEase = 1, 0, 0.1
+    local animTime, animeDelay, animeEase = 1, 0, 0.2
 
     STAFF_PANEL.CreateMenu()
     STAFF_PANEL.DrawMenu()
 
-    local isAnimating = true;
-    STAFF_PANEL.Menu:SizeTo(hudWidth, hudHeight, animTime, animDelay, animEase, function() 
-        isAnimating = false 
-    end)
-
-    STAFF_PANEL.Menu.Think = function(this) 
-        if (isAnimating) then
-            this:Center()
-        end
-    end
-
-    STAFF_PANEL.DisplayButtons()
+    STAFF_PANEL.HandleAnimation(hudWidth, hudHeight, STAFF_PANEL.Menu)
 
     STAFF_PANEL.Menu.OnSizeChanged = function(this, width, height) 
         STAFF_PANEL.HandleResize(height)
     end
+
+    STAFF_PANEL.DisplayButtons()
 
     STAFF_PANEL.Menu.OnKeyCodePressed = function(self, key) 
         keyHandler(key) 
@@ -116,9 +123,14 @@ end
 concommand.Add("openStaffPanel", STAFF_PANEL.OpenMenu)
 
 function STAFF_PANEL.CloseMenu()
-    staffPanelOpenned = false
     chatLogger(LocalPlayer(), "Closing Staff Panel!", Color(255,0,0))
-    STAFF_PANEL.Menu:Close()
+    staffPanelOpenned = false
+
+    STAFF_PANEL.HandleAnimation(0, 0, STAFF_PANEL.Menu)
+
+    STAFF_PANEL.Menu.OnSizeChanged = function(this, width, height) 
+        STAFF_PANEL.HandleResize(height)
+    end
 end
 concommand.Add("closeStaffPanel", STAFF_PANEL.CloseMenu)
 
