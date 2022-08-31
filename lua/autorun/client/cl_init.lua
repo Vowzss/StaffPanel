@@ -39,21 +39,21 @@ function STAFF_PANEL.DisplayButtons()
         end
     
         surface.DrawRect(0,0,width, height)
-        draw.SimpleText(not this.isActive and "Enter Staff Mode" or "Leave Staff Mode", "Roboto", width*0.5, height*0.5, color_white, TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER)
+        draw.SimpleText(not staffModeEnabled and "Enter Staff Mode" or "Leave Staff Mode", "Roboto", width*0.5, height*0.5, color_white, TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER)
     end
 
     toggleStaffModeButton.DoClick = function(this)
         this.isActive = not this.isActive
 
-        if(this.isActive) then
+        net.Start("SP_NET_SV_TurnStaffMode")
+        net.WriteBool(this.isActive)
+        net.SendToServer()
+
+        if(staffModeEnabled) then
             STAFF_PANEL.Menu:SetTitle("StaffPanel - Manager | [Enabled]")
         else
             STAFF_PANEL.Menu:SetTitle("StaffPanel - Manager | [Disabled]")
         end
-
-        net.Start("SP_NET_SV_TurnStaffMode")
-        net.WriteBool(this.isActive)
-        net.SendToServer()
     end
 end
 
@@ -65,11 +65,6 @@ function STAFF_PANEL.HandleResize(height)
 end
 
 function STAFF_PANEL.OpenMenu()
-    if(staffPanelOpenned) then
-        chatLogger(LocalPlayer(), "Staff Panel is already openned!", Color(0,255,0))
-        return
-    end
-
     chatLogger(LocalPlayer(), "Openning Staff Panel!", Color(0,255,0))
     staffPanelOpenned = true
 
@@ -100,6 +95,12 @@ function STAFF_PANEL.OpenMenu()
     STAFF_PANEL.Menu.OnClose = function()
         STAFF_PANEL.CloseMenu()
     end
+
+    function DFrame:OnKeyCodePressed(...) 
+        local keyCode = ...
+        print(keyCode)
+        getKeyPressed(keyCode)
+	end
 end
 concommand.Add("openStaffPanel", STAFF_PANEL.OpenMenu)
 
@@ -113,16 +114,19 @@ function chatLogger(ply, message, color)
     chat.AddText(ADDON_CONFIG.color, ADDON_CONFIG.logger, color, " " .. message)
 end
 
-function keyPressed(ply, keyCode)
-    if keyCode == KEY_O then
-        if not staffPanelOpenned then
-	        STAFF_PANEL.OpenMenu()
-        else
+local function getKeyPressed(keyCode)
+    if (keyCode == KEY_O and IsFirstTimePredicted()) then
+        if(staffPanelOpenned) then
             STAFF_PANEL.CloseMenu()
+        else
+            STAFF_PANEL.OpenMenu()
         end
     end
 end
-hook.Add("KeyPress", "SP_HK_KEY_PRESSED", keyPressed)
+
+hook.Add("PlayerButtonDown", "SP_HK_BUTTON_DOWN", function(ply, keyCode)
+	getKeyPressed(keyCode)
+end)
 
 net.Receive("SP_NET_CL_StaffModeOn", function(len, ply)
     local message = net.ReadString()

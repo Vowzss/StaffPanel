@@ -9,7 +9,7 @@ print()
 
 print("Successfully loaded " .. ADDON_CONFIG.name .. " ver: " .. ADDON_CONFIG.version)
 
-local staffModeEnabled = false
+staffModeEnabled = false
 
 function toggleStaffMode(ply)
     if (ply:HasGodMode()) then return end
