@@ -9,40 +9,60 @@ print()
 
 print("Successfully loaded " .. ADDON_CONFIG.name .. " ver: " .. ADDON_CONFIG.version)
 
-local staffModeEnabled = false
-
-function toggleStaffMode(ply)
-    if (ply:HasGodMode()) then return end
-
-    staffModeEnabled = true
-    ply:GodEnable()
+util.AddNetworkString("SP_NET_CL_StaffModeOn")
+local function toggleStaffMode(ply)
+    ply.staffModeEnabled = true
+    local loggedMessages = {}
+    table.insert(loggedMessages, "Staff mode turned ON!")
+    if (ply:HasGodMode()) then 
+        table.insert(loggedMessages, "  - God mode already ON!")
+    else
+        table.insert(loggedMessages, "  - God mode turned ON!")
+        ply:GodEnable()
+    end
 
     net.Start("SP_NET_CL_StaffModeOn")
-    net.WriteString("Staff mode turned ON!")
-    net.WriteColor(Color(0,255,0))
-    net.SendToServer()
+        net.WriteUInt(#loggedMessages, 8)
+        for _, msg in ipairs(loggedMessages) do
+            net.WriteString(msg)
+        end
+    net.Send(ply)
 end
 
+util.AddNetworkString("SP_NET_CL_StaffModeOff")
 local function unToggleStaffMode(ply)
-    if (not ply:HasGodMode()) then return end
-
-    staffModeEnabled = false
-    ply:GodDisable()
+    ply.staffModeEnabled = false
+    local loggedMessages = {}
+    table.insert(loggedMessages, "Staff mode turned OFF!")
+    if (not ply:HasGodMode()) then 
+        table.insert(loggedMessages, "  - God mode already OFF!")
+    else
+        table.insert(loggedMessages, "  - God mode turned OFF!")
+        ply:GodDisable()
+    end
 
     net.Start("SP_NET_CL_StaffModeOff")
-    net.WriteString("Staff mode turned OFF!")
-    net.WriteColor(Color(255,0,0))
-    net.SendToServer()
+        net.WriteUInt(#loggedMessages, 8)
+        for _, msg in ipairs(loggedMessages) do
+            net.WriteString(msg)
+        end
+    net.Send(ply)
 end
 
-util.AddNetworkString("SP_NET_CL_StaffModeOn")
-util.AddNetworkString("SP_NET_CL_StaffModeOff")
+local function toggleGodMode(ply, toggle)
+    if(toggle and not ply:HasGodMode()) then
+        ply:GodEnable()
+    end
+
+end
+
 
 util.AddNetworkString("SP_NET_SV_TurnStaffMode")
 net.Receive("SP_NET_SV_TurnStaffMode", function(len, ply)
-    local active = net.ReadBool()
+    if not ply:IsValid() then return end
+    local isActive = net.ReadBool()
 
-    if (active) then 
+    if(isActive) then 
         toggleStaffMode(ply)
     else 
         unToggleStaffMode(ply)
