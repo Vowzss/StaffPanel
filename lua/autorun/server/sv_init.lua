@@ -9,17 +9,53 @@ print()
 
 print("Successfully loaded " .. ADDON_CONFIG.name .. " ver: " .. ADDON_CONFIG.version)
 
+local function toggleNoClip(ply, toggle)
+    local log
+    if (toggle) then 
+        if(ply:GetMoveType() == MOVETYPE_NOCLIP) then
+            log = "  - NoClip mode already ON!"
+        else
+            log = "  - NoClip mode turned ON!"
+            ply:SetMoveType(MOVETYPE_NOCLIP)
+        end
+    else
+        if(ply:GetMoveType() != MOVETYPE_NOCLIP) then
+            log = "  - NoClip mode already OFF!"
+        else
+            log = "  - NoClip mode turned OFF!"
+            ply:SetMoveType(MOVETYPE_WALK)
+        end
+    end
+    return log
+end
+
+local function toggleGodMode(ply, toggle)
+    local log
+    if(toggle) then
+        if(ply:HasGodMode()) then 
+            log = "  - God mode already ON!"
+        else 
+            log = "  - God mode turned ON!"
+            ply:GodEnable()
+        end
+    else
+        if(not ply:HasGodMode()) then 
+            log = "  - God mode already OFF!"
+        else 
+            log = "  - God mode turned OFF!"
+            ply:GodDisable()
+        end
+    end
+    return log
+end
+
 util.AddNetworkString("SP_NET_CL_StaffModeOn")
 local function toggleStaffMode(ply)
     ply.staffModeEnabled = true
     local loggedMessages = {}
     table.insert(loggedMessages, "Staff mode turned ON!")
-    if (ply:HasGodMode()) then 
-        table.insert(loggedMessages, "  - God mode already ON!")
-    else
-        table.insert(loggedMessages, "  - God mode turned ON!")
-        ply:GodEnable()
-    end
+    table.insert(loggedMessages, toggleGodMode(ply, true))
+    table.insert(loggedMessages, toggleNoClip(ply, true))
 
     net.Start("SP_NET_CL_StaffModeOn")
         net.WriteUInt(#loggedMessages, 8)
@@ -34,12 +70,8 @@ local function unToggleStaffMode(ply)
     ply.staffModeEnabled = false
     local loggedMessages = {}
     table.insert(loggedMessages, "Staff mode turned OFF!")
-    if (not ply:HasGodMode()) then 
-        table.insert(loggedMessages, "  - God mode already OFF!")
-    else
-        table.insert(loggedMessages, "  - God mode turned OFF!")
-        ply:GodDisable()
-    end
+    table.insert(loggedMessages, toggleGodMode(ply, false))
+    table.insert(loggedMessages, toggleNoClip(ply, false))
 
     net.Start("SP_NET_CL_StaffModeOff")
         net.WriteUInt(#loggedMessages, 8)
@@ -48,14 +80,6 @@ local function unToggleStaffMode(ply)
         end
     net.Send(ply)
 end
-
-local function toggleGodMode(ply, toggle)
-    if(toggle and not ply:HasGodMode()) then
-        ply:GodEnable()
-    end
-
-end
-
 
 util.AddNetworkString("SP_NET_SV_TurnStaffMode")
 net.Receive("SP_NET_SV_TurnStaffMode", function(len, ply)

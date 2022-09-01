@@ -28,17 +28,18 @@ end
 
 function STAFF_PANEL.DisplayFrameButtons()
     toggleStaffModeButton = STAFF_PANEL.Frame:Add("DButton")
-    toggleStaffModeButton:Dock(TOP)
+    toggleStaffModeButton:SetPos(10, 35)
+    toggleStaffModeButton:SetSize(250,100)
     toggleStaffModeButton:SetText("")
     toggleStaffModeButton.isActive = false 
     toggleStaffModeButton.Paint = function(this, width, height)
-        surface.SetDrawColor(210,144,52)
+        surface.SetDrawColor(ADDON_THEME.main)
+        surface.DrawRect(0,0,width,height)
 
         if (this:IsHovered()) then
             surface.SetDrawColor(102,72,29)
         end
-    
-        surface.DrawRect(50,0,width-100, height)
+
         draw.SimpleText(not localPlayer.staffModeEnabled and "Enter Staff Mode" or "Leave Staff Mode", "Roboto", width*0.5, height*0.5, color_white, TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER)
     end
 
@@ -153,7 +154,7 @@ net.Receive("SP_NET_CL_StaffModeOn", function(len, ply)
     local color = ADDON_THEME.on_message
     local loggedLength = net.ReadUInt(8)
 
-    for i=1, loggedLength do
+    for i=1, loggedLength, 1 do
         local message = net.ReadString()
         chatLogger(ply, message, color)
     end
