@@ -28,7 +28,7 @@ function STAFF_PANEL.DisplayFrameButtons()
     toggleStaffModeButton:SetPos(10, 35)
     toggleStaffModeButton:SetSize(250,100)
     toggleStaffModeButton:SetText("")
-    toggleStaffModeButton.isActive = false 
+    toggleStaffModeButton.isActive = LocalPlayer().staffModeEnabled 
     toggleStaffModeButton.Paint = function(this, width, height)
         surface.SetDrawColor(ADDON_THEME.main)
 
@@ -47,12 +47,6 @@ function STAFF_PANEL.DisplayFrameButtons()
         net.Start("SP_NET_SV_TurnStaffMode")
         net.WriteBool(this.isActive)
         net.SendToServer()
-
-        if(not LocalPlayer().staffModeEnabled) then
-            STAFF_PANEL.Frame:SetTitle("StaffPanel - Manager | [Enabled]")
-        else
-            STAFF_PANEL.Frame:SetTitle("StaffPanel - Manager | [Disabled]")
-        end
     end
 end
 
@@ -89,7 +83,7 @@ end
 
 function STAFF_PANEL.CreateFrame()
     STAFF_PANEL.Frame = vgui.Create("DFrame")
-    STAFF_PANEL.Frame:SetTitle("StaffPanel - Manager")
+    STAFF_PANEL.Frame:SetTitle("StaffPanel - Manager | " .. (LocalPlayer().staffModeEnabled and "[Enabled]" or "[Disabled]"))
     STAFF_PANEL.Frame:MakePopup(true)
     STAFF_PANEL.Frame:SetDeleteOnClose(true)
     STAFF_PANEL.Frame:SetSize(0, 0)
@@ -107,6 +101,11 @@ function STAFF_PANEL.DrawFrame()
 end
 
 function STAFF_PANEL.OpenFrame()
+    if(staffPanelOpenned) then 
+        chatLogger(LocalPlayer(), "Staff Panel is already openned!", ADDON_THEME.off_message)
+        return 
+    end
+
     chatLogger(LocalPlayer(), "Openning Staff Panel!", ADDON_THEME.on_message)
 
     STAFF_PANEL.CreateFrame()
@@ -128,6 +127,11 @@ end
 concommand.Add("openStaffPanel", STAFF_PANEL.OpenFrame)
 
 function STAFF_PANEL.CloseFrame()
+    if(not staffPanelOpenned) then 
+        chatLogger(LocalPlayer(), "Staff Panel isn't openned!", ADDON_THEME.off_message)
+        return 
+    end
+
     chatLogger(LocalPlayer(), "Closing Staff Panel!", ADDON_THEME.off_message)
 
     STAFF_PANEL.Frame:ShowCloseButton(false)
@@ -149,6 +153,8 @@ hook.Add("PlayerButtonDown", "SP_HK_BUTTON_DOWN", function(ply, keyCode)
 end)
 
 net.Receive("SP_NET_CL_StaffModeOn", function(len, ply)
+    STAFF_PANEL.Frame:SetTitle("StaffPanel - Manager | [Enabled]")
+
     local color = ADDON_THEME.on_message
     LocalPlayer().staffModeEnabled = net.ReadBool()
     local loggedLength = net.ReadUInt(8)
@@ -160,6 +166,8 @@ net.Receive("SP_NET_CL_StaffModeOn", function(len, ply)
 end)
 
 net.Receive("SP_NET_CL_StaffModeOff", function(len, ply)
+    STAFF_PANEL.Frame:SetTitle("StaffPanel - Manager | [Disabled]")
+
     local color = ADDON_THEME.off_message
     LocalPlayer().staffModeEnabled = net.ReadBool()
     local loggedLength = net.ReadUInt(8)
