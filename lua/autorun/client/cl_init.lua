@@ -10,9 +10,6 @@ local closeKeyPressed = false
 local staffPanelOpenned = false
 local prevTime = 0
 
-local localPlayer = LocalPlayer()
-localPlayer.staffModeEnabled = false
-
 local function keyHandler(keyCode)
     closeKeyPressed = false
     if (keyCode == KEY_O and UnPredictedCurTime() > prevTime + 0.05) then
@@ -34,13 +31,14 @@ function STAFF_PANEL.DisplayFrameButtons()
     toggleStaffModeButton.isActive = false 
     toggleStaffModeButton.Paint = function(this, width, height)
         surface.SetDrawColor(ADDON_THEME.main)
-        surface.DrawRect(0,0,width,height)
 
         if (this:IsHovered()) then
             surface.SetDrawColor(102,72,29)
         end
 
-        draw.SimpleText(not localPlayer.staffModeEnabled and "Enter Staff Mode" or "Leave Staff Mode", "Roboto", width*0.5, height*0.5, color_white, TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER)
+        surface.DrawRect(0,0,width,height)
+
+        draw.SimpleText(not LocalPlayer().staffModeEnabled and "Enter Staff Mode" or "Leave Staff Mode", "Roboto", width*0.5, height*0.5, color_white, TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER)
     end
 
     toggleStaffModeButton.DoClick = function(this)
@@ -50,7 +48,7 @@ function STAFF_PANEL.DisplayFrameButtons()
         net.WriteBool(this.isActive)
         net.SendToServer()
 
-        if(localPlayer.staffModeEnabled) then
+        if(not LocalPlayer().staffModeEnabled) then
             STAFF_PANEL.Frame:SetTitle("StaffPanel - Manager | [Enabled]")
         else
             STAFF_PANEL.Frame:SetTitle("StaffPanel - Manager | [Disabled]")
@@ -152,6 +150,7 @@ end)
 
 net.Receive("SP_NET_CL_StaffModeOn", function(len, ply)
     local color = ADDON_THEME.on_message
+    LocalPlayer().staffModeEnabled = net.ReadBool()
     local loggedLength = net.ReadUInt(8)
 
     for i=1, loggedLength, 1 do
@@ -162,6 +161,7 @@ end)
 
 net.Receive("SP_NET_CL_StaffModeOff", function(len, ply)
     local color = ADDON_THEME.off_message
+    LocalPlayer().staffModeEnabled = net.ReadBool()
     local loggedLength = net.ReadUInt(8)
     
     for i=1, loggedLength do

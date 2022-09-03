@@ -58,6 +58,7 @@ local function toggleStaffMode(ply)
     table.insert(loggedMessages, toggleNoClip(ply, true))
 
     net.Start("SP_NET_CL_StaffModeOn")
+        net.WriteBool(ply.staffModeEnabled)
         net.WriteUInt(#loggedMessages, 8)
         for _, msg in ipairs(loggedMessages) do
             net.WriteString(msg)
@@ -74,6 +75,7 @@ local function unToggleStaffMode(ply)
     table.insert(loggedMessages, toggleNoClip(ply, false))
 
     net.Start("SP_NET_CL_StaffModeOff")
+        net.WriteBool(ply.staffModeEnabled)
         net.WriteUInt(#loggedMessages, 8)
         for _, msg in ipairs(loggedMessages) do
             net.WriteString(msg)
