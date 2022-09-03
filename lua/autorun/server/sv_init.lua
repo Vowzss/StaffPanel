@@ -16,6 +16,7 @@ local function toggleNoClip(ply, toggle)
             log = "  - NoClip mode already [ON]!"
         else
             log = "  - NoClip mode turned [ON]!"
+            ply:SetNWBool("isNoClipEnabled", false)
             ply:SetMoveType(MOVETYPE_NOCLIP)
         end
     else
@@ -23,6 +24,7 @@ local function toggleNoClip(ply, toggle)
             log = "  - NoClip mode already [OFF]!"
         else
             log = "  - NoClip mode turned [OFF]!"
+            ply:SetNWBool("isNoClipEnabled", false)
             ply:SetMoveType(MOVETYPE_WALK)
         end
     end
@@ -36,6 +38,7 @@ local function toggleGodMode(ply, toggle)
             log = "  - God mode already [ON]!"
         else 
             log = "  - God mode turned [ON]!"
+            ply:SetNWBool("isGodEnabled", true)
             ply:GodEnable()
         end
     else
@@ -43,6 +46,7 @@ local function toggleGodMode(ply, toggle)
             log = "  - God mode already [OFF]!"
         else 
             log = "  - God mode turned [OFF]!"
+            ply:SetNWBool("isGodEnabled", false)
             ply:GodDisable()
         end
     end
@@ -56,14 +60,14 @@ local function toggleVisibility(ply, toggle)
             log = "  - Invisibility already [ON]!"
         else 
             log = "  - Invisibility turned [ON]!"
-            ply.isVisible = true
+            ply:SetNWBool("isVisible", true)
         end
     else
         if(not ply.isVisible) then 
             log = "  - Invisibility already [OFF]!"
         else 
             log = "  - Invisibility turned [OFF]!"
-            ply.isVisible = false
+            ply:SetNWBool("isVisible", false)
         end
     end
     return log
@@ -71,7 +75,8 @@ end
 
 util.AddNetworkString("SP_NET_CL_StaffModeOn")
 local function toggleStaffMode(ply)
-    ply.staffModeEnabled = true
+    ply:SetNWBool("isStaffEnabled", true)
+
     local loggedMessages = {}
     table.insert(loggedMessages, "Staff mode turned [ON]!")
     table.insert(loggedMessages, toggleGodMode(ply, true))
@@ -79,7 +84,6 @@ local function toggleStaffMode(ply)
     table.insert(loggedMessages, toggleVisibility(ply, true))
 
     net.Start("SP_NET_CL_StaffModeOn")
-        net.WriteBool(ply.staffModeEnabled)
         net.WriteUInt(#loggedMessages, 8)
         for _, msg in ipairs(loggedMessages) do
             net.WriteString(msg)
@@ -89,7 +93,8 @@ end
 
 util.AddNetworkString("SP_NET_CL_StaffModeOff")
 local function unToggleStaffMode(ply)
-    ply.staffModeEnabled = false
+    ply:SetNWBool("isStaffEnabled", false)
+
     local loggedMessages = {}
     table.insert(loggedMessages, "Staff mode turned [OFF]!")
     table.insert(loggedMessages, toggleGodMode(ply, false))
@@ -97,7 +102,6 @@ local function unToggleStaffMode(ply)
     table.insert(loggedMessages, toggleVisibility(ply, false ))
 
     net.Start("SP_NET_CL_StaffModeOff")
-        net.WriteBool(ply.staffModeEnabled)
         net.WriteUInt(#loggedMessages, 8)
         for _, msg in ipairs(loggedMessages) do
             net.WriteString(msg)

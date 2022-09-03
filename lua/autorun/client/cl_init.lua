@@ -28,7 +28,7 @@ function STAFF_PANEL.DisplayFrameButtons()
     toggleStaffModeButton:SetPos(10, 35)
     toggleStaffModeButton:SetSize(250,100)
     toggleStaffModeButton:SetText("")
-    toggleStaffModeButton.isActive = LocalPlayer().staffModeEnabled 
+    toggleStaffModeButton.isActive = LocalPlayer():GetNWBool("isStaffEnabled") 
     toggleStaffModeButton.Paint = function(this, width, height)
         surface.SetDrawColor(ADDON_THEME.main)
 
@@ -38,7 +38,7 @@ function STAFF_PANEL.DisplayFrameButtons()
 
         surface.DrawRect(0,0,width,height)
 
-        draw.SimpleText(not LocalPlayer().staffModeEnabled and "Enter Staff Mode" or "Leave Staff Mode", "Roboto", width*0.5, height*0.5, color_white, TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER)
+        draw.SimpleText(not LocalPlayer():GetNWBool("isStaffEnabled") and "Enter Staff Mode" or "Leave Staff Mode", "Roboto", width*0.5, height*0.5, color_white, TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER)
     end
 
     toggleStaffModeButton.DoClick = function(this)
@@ -83,7 +83,7 @@ end
 
 function STAFF_PANEL.CreateFrame()
     STAFF_PANEL.Frame = vgui.Create("DFrame")
-    STAFF_PANEL.Frame:SetTitle("StaffPanel - Manager | " .. (LocalPlayer().staffModeEnabled and "[Enabled]" or "[Disabled]"))
+    STAFF_PANEL.Frame:SetTitle("StaffPanel - Manager | " .. (LocalPlayer():GetNWBool("isStaffEnabled") and "[Enabled]" or "[Disabled]"))
     STAFF_PANEL.Frame:MakePopup(true)
     STAFF_PANEL.Frame:SetDeleteOnClose(true)
     STAFF_PANEL.Frame:SetSize(0, 0)
@@ -156,7 +156,6 @@ net.Receive("SP_NET_CL_StaffModeOn", function(len, ply)
     STAFF_PANEL.Frame:SetTitle("StaffPanel - Manager | [Enabled]")
 
     local color = ADDON_THEME.on_message
-    LocalPlayer().staffModeEnabled = net.ReadBool()
     local loggedLength = net.ReadUInt(8)
 
     for i=1, loggedLength, 1 do
@@ -169,9 +168,8 @@ net.Receive("SP_NET_CL_StaffModeOff", function(len, ply)
     STAFF_PANEL.Frame:SetTitle("StaffPanel - Manager | [Disabled]")
 
     local color = ADDON_THEME.off_message
-    LocalPlayer().staffModeEnabled = net.ReadBool()
     local loggedLength = net.ReadUInt(8)
-    
+
     for i=1, loggedLength do
         local message = net.ReadString()
         chatLogger(ply, message, color)
@@ -179,6 +177,8 @@ net.Receive("SP_NET_CL_StaffModeOff", function(len, ply)
 end)
 
 hook.Add("PrePlayerDraw", "SP_HK_PLAYER_DRAW", function(ply)
-    print(ply.IsVisible)
-    if(not ply.isVisible) then return true end
+    if (ply:GetNWBool("isStaffEnabled")) then 
+        print("done")
+        return true 
+    end
 end)
