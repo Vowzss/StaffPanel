@@ -177,3 +177,8 @@ net.Receive("SP_NET_CL_StaffModeOff", function(len, ply)
         chatLogger(ply, message, color)
     end
 end)
+
+hook.Add("PrePlayerDraw", "SP_HK_PLAYER_DRAW", function(ply)
+    print(ply.IsVisible)
+    if(not ply.isVisible) then return true end
+end)
