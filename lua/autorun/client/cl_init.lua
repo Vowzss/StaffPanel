@@ -146,12 +146,6 @@ function chatLogger(ply, message, color)
     chat.AddText(ADDON_THEME.logger_color, ADDON_CONFIG.logger, color, " " .. message)
 end
 
-hook.Add("PlayerButtonDown", "SP_HK_BUTTON_DOWN", function(ply, keyCode)
-    if(IsFirstTimePredicted()) then
-	    keyHandler(keyCode)
-    end
-end)
-
 net.Receive("SP_NET_CL_StaffModeOn", function(len, ply)
     STAFF_PANEL.Frame:SetTitle("StaffPanel - Manager | [Enabled]")
 
@@ -163,6 +157,44 @@ net.Receive("SP_NET_CL_StaffModeOn", function(len, ply)
         chatLogger(ply, message, color)
     end
 end)
+
+function vanish(ply)
+    ply:SetNWBool("isVisible", not ply:GetNWBool("isVisible"))
+    print(ply:GetNWBool("isVisible"))
+end
+concommand.Add("vanish", vanish)
+
+function thirdPersonView(ply)
+    ply:DrawViewModel(false)
+    hook.Add("ShouldDrawLocalPlayer", "SP_HK_LOCAL_PLAYER_DRAW", function(ply)
+        if (ply:GetNWBool("isStaffEnabled") and ply:GetNWBool("isInvisible")) then
+            ply:DrawShadow(false)
+            ply:SetMaterial("models/effects/vol_light001")
+            ply:SetRenderMode(RENDERMODE_TRANSALPHA)
+            return true
+        else
+            ply:DrawShadow(true)
+            ply:SetMaterial("")
+            ply:SetRenderMode(RENDERMODE_NORMAL)
+            return false 
+        end
+    end)
+    hook.Add("CalcView", "SP_HK_LOCAL_PLAYER_DRAW", function(ply)
+        if (ply:GetNWBool("isStaffEnabled") and ply:GetNWBool("isInvisible")) then
+            ply:DrawShadow(false)
+            ply:SetMaterial("models/effects/vol_light001")
+            ply:SetRenderMode(RENDERMODE_TRANSALPHA)
+            ply.Owner.DrawViewModel(false)
+            return true
+        else
+            ply:DrawShadow(true)
+            ply:SetMaterial("")
+            ply:SetRenderMode(RENDERMODE_NORMAL)
+            ply.Owner.DrawViewModel(true)
+            return false 
+        end
+    end)
+end
 
 net.Receive("SP_NET_CL_StaffModeOff", function(len, ply)
     STAFF_PANEL.Frame:SetTitle("StaffPanel - Manager | [Disabled]")
@@ -176,9 +208,30 @@ net.Receive("SP_NET_CL_StaffModeOff", function(len, ply)
     end
 end)
 
+hook.Add("PlayerButtonDown", "SP_HK_BUTTON_DOWN", function(ply, keyCode)
+    if(IsFirstTimePredicted()) then
+	    keyHandler(keyCode)
+    end
+end)
+
 hook.Add("PrePlayerDraw", "SP_HK_PLAYER_DRAW", function(ply)
-    if (ply:GetNWBool("isStaffEnabled")) then 
-        print("done")
+    if (ply:GetNWBool("isStaffEnabled") and ply:GetNWBool("isInvisible")) then
+        ply:DrawShadow(false)
+        ply:SetMaterial("models/effects/vol_light001")
+        ply:SetRenderMode(RENDERMODE_TRANSALPHA)
+        return true
+    else
+        ply:DrawShadow(true)
+        ply:SetMaterial("")
+        ply:SetRenderMode(RENDERMODE_NORMAL)
+        return false 
+    end
+end)
+
+hook.Add("DrawPhysgunBeam", "SP_HK_PHYS_BEAM_DRAW", function( ply)
+    if (ply:GetNWBool("isStaffEnabled") and ply:GetNWBool("isInvisible")) then
+        return false  
+    else
         return true 
     end
 end)

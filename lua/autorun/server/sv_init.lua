@@ -53,21 +53,21 @@ local function toggleGodMode(ply, toggle)
     return log
 end
 
-local function toggleVisibility(ply, toggle)
+local function toggleInvisibility(ply, toggle)
     local log
     if(toggle) then
-        if(ply.isVisible) then 
+        if(ply:GetNWBool("isVisible")) then
             log = "  - Invisibility already [ON]!"
         else 
             log = "  - Invisibility turned [ON]!"
-            ply:SetNWBool("isVisible", true)
+            ply:SetNWBool("isInvisible", true )
         end
     else
-        if(not ply.isVisible) then 
+        if(ply:GetNWBool("isVisible")) then 
             log = "  - Invisibility already [OFF]!"
         else 
             log = "  - Invisibility turned [OFF]!"
-            ply:SetNWBool("isVisible", false)
+            ply:SetNWBool("isInvisible", false )
         end
     end
     return log
@@ -81,7 +81,7 @@ local function toggleStaffMode(ply)
     table.insert(loggedMessages, "Staff mode turned [ON]!")
     table.insert(loggedMessages, toggleGodMode(ply, true))
     table.insert(loggedMessages, toggleNoClip(ply, true))
-    table.insert(loggedMessages, toggleVisibility(ply, true))
+    table.insert(loggedMessages, toggleInvisibility(ply, true))
 
     net.Start("SP_NET_CL_StaffModeOn")
         net.WriteUInt(#loggedMessages, 8)
@@ -99,7 +99,7 @@ local function unToggleStaffMode(ply)
     table.insert(loggedMessages, "Staff mode turned [OFF]!")
     table.insert(loggedMessages, toggleGodMode(ply, false))
     table.insert(loggedMessages, toggleNoClip(ply, false))
-    table.insert(loggedMessages, toggleVisibility(ply, false ))
+    table.insert(loggedMessages, toggleInvisibility(ply, false ))
 
     net.Start("SP_NET_CL_StaffModeOff")
         net.WriteUInt(#loggedMessages, 8)
