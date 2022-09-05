@@ -16,8 +16,5 @@ ADDON_THEME = {
     ["off_message"] = Color(235, 111, 146),
 }
 
-function consoleLogger(message, color)
-    MsgC(ADDON_THEME.logger_color, ADDON_CONFIG.logger, color, " " .. message .. "\n")
-end
-
 STAFF_PANEL = {}
+TICKET_PANEL = {}
