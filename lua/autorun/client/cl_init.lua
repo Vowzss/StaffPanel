@@ -28,7 +28,7 @@ function STAFF_PANEL.DisplayFrameButtons()
     toggleStaffModeButton:SetPos(10, 35)
     toggleStaffModeButton:SetSize(250,100)
     toggleStaffModeButton:SetText("")
-    toggleStaffModeButton.isActive = LocalPlayer():GetNWBool("isStaffEnabled") 
+    toggleStaffModeButton.isActive = LocalPlayer():GetNWBool("SP_NW_S_ENABLED") 
     toggleStaffModeButton.Paint = function(this, width, height)
         surface.SetDrawColor(ADDON_THEME.main)
 
@@ -38,13 +38,13 @@ function STAFF_PANEL.DisplayFrameButtons()
 
         surface.DrawRect(0,0,width,height)
 
-        draw.SimpleText(not LocalPlayer():GetNWBool("isStaffEnabled") and "Enter Staff Mode" or "Leave Staff Mode", "Roboto", width*0.5, height*0.5, color_white, TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER)
+        draw.SimpleText(not LocalPlayer():GetNWBool("SP_NW_S_ENABLED") and "Enter SMode" or "Leave SMode", "Roboto", width*0.5, height*0.5, color_white, TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER)
     end
 
     toggleStaffModeButton.DoClick = function(this)
         this.isActive = not this.isActive
 
-        net.Start("SP_NET_SV_TurnStaffMode")
+        net.Start("SP_NET_SV_TURN_S_MODE")
         net.WriteBool(this.isActive)
         net.SendToServer()
     end
@@ -83,7 +83,7 @@ end
 
 function STAFF_PANEL.CreateFrame()
     STAFF_PANEL.Frame = vgui.Create("DFrame")
-    STAFF_PANEL.Frame:SetTitle("StaffPanel - Manager | " .. (LocalPlayer():GetNWBool("isStaffEnabled") and "[Enabled]" or "[Disabled]"))
+    STAFF_PANEL.Frame:SetTitle("SPanel - Manager | " .. (LocalPlayer():GetNWBool("SP_NW_S_ENABLED") and "[Enabled]" or "[Disabled]"))
     STAFF_PANEL.Frame:MakePopup(true)
     STAFF_PANEL.Frame:SetDeleteOnClose(true)
     STAFF_PANEL.Frame:SetSize(0, 0)
@@ -102,11 +102,11 @@ end
 
 function STAFF_PANEL.OpenFrame()
     if(staffPanelOpenned) then 
-        chatLogger(LocalPlayer(), "Staff Panel is already openned!", ADDON_THEME.off_message)
+        chatLogger(LocalPlayer(), "SPanel is already openned!", ADDON_THEME.off_message)
         return 
     end
 
-    chatLogger(LocalPlayer(), "Openning Staff Panel!", ADDON_THEME.on_message)
+    chatLogger(LocalPlayer(), "Openning SPanel!", ADDON_THEME.on_message)
 
     STAFF_PANEL.CreateFrame()
     STAFF_PANEL.DrawFrame()
@@ -124,15 +124,15 @@ function STAFF_PANEL.OpenFrame()
         STAFF_PANEL.CloseFrame()
     end
 end
-concommand.Add("openStaffPanel", STAFF_PANEL.OpenFrame)
+concommand.Add("openSPanel", STAFF_PANEL.OpenFrame)
 
 function STAFF_PANEL.CloseFrame()
     if(not staffPanelOpenned) then 
-        chatLogger(LocalPlayer(), "Staff Panel isn't openned!", ADDON_THEME.off_message)
+        chatLogger(LocalPlayer(), "SPanel isn't openned!", ADDON_THEME.off_message)
         return 
     end
 
-    chatLogger(LocalPlayer(), "Closing Staff Panel!", ADDON_THEME.off_message)
+    chatLogger(LocalPlayer(), "Closing SPanel!", ADDON_THEME.off_message)
 
     STAFF_PANEL.Frame:ShowCloseButton(false)
     STAFF_PANEL.HandleFrameAnimation(0, 0, STAFF_PANEL.Frame)
@@ -140,14 +140,14 @@ function STAFF_PANEL.CloseFrame()
 
     staffPanelOpenned = false
 end
-concommand.Add("closeStaffPanel", STAFF_PANEL.CloseFrame)
+concommand.Add("closeSPanel", STAFF_PANEL.CloseFrame)
 
 function chatLogger(ply, message, color)
     chat.AddText(ADDON_THEME.logger_color, ADDON_CONFIG.logger, color, " " .. message)
 end
 
-net.Receive("SP_NET_CL_StaffModeOn", function(len, ply)
-    STAFF_PANEL.Frame:SetTitle("StaffPanel - Manager | [Enabled]")
+net.Receive("SP_NET_CL_S_ENABLED", function(len, ply)
+    STAFF_PANEL.Frame:SetTitle("SPanel - Manager | [Enabled]")
 
     local color = ADDON_THEME.on_message
     local loggedLength = net.ReadUInt(8)
@@ -158,46 +158,8 @@ net.Receive("SP_NET_CL_StaffModeOn", function(len, ply)
     end
 end)
 
-function vanish(ply)
-    ply:SetNWBool("isVisible", not ply:GetNWBool("isVisible"))
-    print(ply:GetNWBool("isVisible"))
-end
-concommand.Add("vanish", vanish)
-
-function thirdPersonView(ply)
-    ply:DrawViewModel(false)
-    hook.Add("ShouldDrawLocalPlayer", "SP_HK_LOCAL_PLAYER_DRAW", function(ply)
-        if (ply:GetNWBool("isStaffEnabled") and ply:GetNWBool("isInvisible")) then
-            ply:DrawShadow(false)
-            ply:SetMaterial("models/effects/vol_light001")
-            ply:SetRenderMode(RENDERMODE_TRANSALPHA)
-            return true
-        else
-            ply:DrawShadow(true)
-            ply:SetMaterial("")
-            ply:SetRenderMode(RENDERMODE_NORMAL)
-            return false 
-        end
-    end)
-    hook.Add("CalcView", "SP_HK_LOCAL_PLAYER_DRAW", function(ply)
-        if (ply:GetNWBool("isStaffEnabled") and ply:GetNWBool("isInvisible")) then
-            ply:DrawShadow(false)
-            ply:SetMaterial("models/effects/vol_light001")
-            ply:SetRenderMode(RENDERMODE_TRANSALPHA)
-            ply.Owner.DrawViewModel(false)
-            return true
-        else
-            ply:DrawShadow(true)
-            ply:SetMaterial("")
-            ply:SetRenderMode(RENDERMODE_NORMAL)
-            ply.Owner.DrawViewModel(true)
-            return false 
-        end
-    end)
-end
-
-net.Receive("SP_NET_CL_StaffModeOff", function(len, ply)
-    STAFF_PANEL.Frame:SetTitle("StaffPanel - Manager | [Disabled]")
+net.Receive("SP_NET_CL_S_DISABLED", function(len, ply)
+    STAFF_PANEL.Frame:SetTitle("SPanel - Manager | [Disabled]")
 
     local color = ADDON_THEME.off_message
     local loggedLength = net.ReadUInt(8)
@@ -215,7 +177,7 @@ hook.Add("PlayerButtonDown", "SP_HK_BUTTON_DOWN", function(ply, keyCode)
 end)
 
 hook.Add("PrePlayerDraw", "SP_HK_PLAYER_DRAW", function(ply)
-    if (ply:GetNWBool("isStaffEnabled") and ply:GetNWBool("isInvisible")) then
+    if (ply:GetNWBool("SP_NW_S_ENABLED") and ply:GetNWBool("SP_NW_VISIBLE")) then
         ply:DrawShadow(false)
         ply:SetMaterial("models/effects/vol_light001")
         ply:SetRenderMode(RENDERMODE_TRANSALPHA)
@@ -229,7 +191,7 @@ hook.Add("PrePlayerDraw", "SP_HK_PLAYER_DRAW", function(ply)
 end)
 
 hook.Add("DrawPhysgunBeam", "SP_HK_PHYS_BEAM_DRAW", function( ply)
-    if (ply:GetNWBool("isStaffEnabled") and ply:GetNWBool("isInvisible")) then
+    if (ply:GetNWBool("SP_NW_S_ENABLED") and ply:GetNWBool("SP_NW_VISIBLE")) then
         return false  
     else
         return true 

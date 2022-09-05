@@ -1,9 +1,9 @@
 ADDON_CONFIG = {
-    ["name"] = "StaffPanel",
+    ["name"] = "SPanel",
     ["author"] = "NoIdeaIndustry",
     ["version"] = "1.0.0",
 
-    ["logger"] = "[Logger - StaffPanel]",
+    ["logger"] = "[Logger - SPanel]",
 }
 
 ADDON_THEME = {

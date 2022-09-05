@@ -16,7 +16,7 @@ local function toggleNoClip(ply, toggle)
             log = "  - NoClip mode already [ON]!"
         else
             log = "  - NoClip mode turned [ON]!"
-            ply:SetNWBool("isNoClipEnabled", false)
+            ply:SetNWBool("SP_NW_NOCLIP", false)
             ply:SetMoveType(MOVETYPE_NOCLIP)
         end
     else
@@ -24,7 +24,7 @@ local function toggleNoClip(ply, toggle)
             log = "  - NoClip mode already [OFF]!"
         else
             log = "  - NoClip mode turned [OFF]!"
-            ply:SetNWBool("isNoClipEnabled", false)
+            ply:SetNWBool("SP_NW_NOCLIP", false)
             ply:SetMoveType(MOVETYPE_WALK)
         end
     end
@@ -38,7 +38,7 @@ local function toggleGodMode(ply, toggle)
             log = "  - God mode already [ON]!"
         else 
             log = "  - God mode turned [ON]!"
-            ply:SetNWBool("isGodEnabled", true)
+            ply:SetNWBool("SP_NW_GOD", true)
             ply:GodEnable()
         end
     else
@@ -46,7 +46,7 @@ local function toggleGodMode(ply, toggle)
             log = "  - God mode already [OFF]!"
         else 
             log = "  - God mode turned [OFF]!"
-            ply:SetNWBool("isGodEnabled", false)
+            ply:SetNWBool("SP_NW_GOD", false)
             ply:GodDisable()
         end
     end
@@ -56,34 +56,34 @@ end
 local function toggleInvisibility(ply, toggle)
     local log
     if(toggle) then
-        if(ply:GetNWBool("isVisible")) then
+        if(ply:GetNWBool("SP_NW_VISIBLE")) then
             log = "  - Invisibility already [ON]!"
         else 
             log = "  - Invisibility turned [ON]!"
-            ply:SetNWBool("isInvisible", true )
+            ply:SetNWBool("SP_NW_VISIBLE", true )
         end
     else
-        if(ply:GetNWBool("isVisible")) then 
+        if(ply:GetNWBool("SP_NW_VISIBLE")) then 
             log = "  - Invisibility already [OFF]!"
         else 
             log = "  - Invisibility turned [OFF]!"
-            ply:SetNWBool("isInvisible", false )
+            ply:SetNWBool("SP_NW_VISIBLE", false )
         end
     end
     return log
 end
 
-util.AddNetworkString("SP_NET_CL_StaffModeOn")
-local function toggleStaffMode(ply)
-    ply:SetNWBool("isStaffEnabled", true)
+util.AddNetworkString("SP_NET_CL_S_ENABLED")
+local function toggleSMode(ply)
+    ply:SetNWBool("SP_NW_S_ENABLED", true)
 
     local loggedMessages = {}
-    table.insert(loggedMessages, "Staff mode turned [ON]!")
+    table.insert(loggedMessages, "SMode turned [ON]!")
     table.insert(loggedMessages, toggleGodMode(ply, true))
     table.insert(loggedMessages, toggleNoClip(ply, true))
     table.insert(loggedMessages, toggleInvisibility(ply, true))
 
-    net.Start("SP_NET_CL_StaffModeOn")
+    net.Start("SP_NET_CL_S_ENABLED")
         net.WriteUInt(#loggedMessages, 8)
         for _, msg in ipairs(loggedMessages) do
             net.WriteString(msg)
@@ -91,17 +91,17 @@ local function toggleStaffMode(ply)
     net.Send(ply)
 end
 
-util.AddNetworkString("SP_NET_CL_StaffModeOff")
-local function unToggleStaffMode(ply)
-    ply:SetNWBool("isStaffEnabled", false)
+util.AddNetworkString("SP_NET_CL_S_DISABLED")
+local function unToggleSMode(ply)
+    ply:SetNWBool("SP_NW_S_ENABLED", false)
 
     local loggedMessages = {}
-    table.insert(loggedMessages, "Staff mode turned [OFF]!")
+    table.insert(loggedMessages, "SMode turned [OFF]!")
     table.insert(loggedMessages, toggleGodMode(ply, false))
     table.insert(loggedMessages, toggleNoClip(ply, false))
     table.insert(loggedMessages, toggleInvisibility(ply, false ))
 
-    net.Start("SP_NET_CL_StaffModeOff")
+    net.Start("SP_NET_CL_S_DISABLED")
         net.WriteUInt(#loggedMessages, 8)
         for _, msg in ipairs(loggedMessages) do
             net.WriteString(msg)
@@ -109,14 +109,14 @@ local function unToggleStaffMode(ply)
     net.Send(ply)
 end
 
-util.AddNetworkString("SP_NET_SV_TurnStaffMode")
-net.Receive("SP_NET_SV_TurnStaffMode", function(len, ply)
+util.AddNetworkString("SP_NET_SV_TURN_S_MODE")
+net.Receive("SP_NET_SV_TURN_S_MODE", function(len, ply)
     if not ply:IsValid() then return end
     local isActive = net.ReadBool()
 
     if(isActive) then 
-        toggleStaffMode(ply)
+        toggleSMode(ply)
     else 
-        unToggleStaffMode(ply)
+        unToggleSMode(ply)
     end
 end)
