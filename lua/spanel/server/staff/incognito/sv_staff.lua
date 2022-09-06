@@ -20,6 +20,20 @@ local function toggleNoClip(ply, toggle)
     return log
 end
 
+local function toggleWeapons(ply, toggle)
+    if(toggle) then
+        local weapons = ply:GetWeapons()
+        for _, value in pairs(weapons) do
+            print(value)
+        end
+    else
+        local weapons = ply:GetWeapons()
+        for _, value in pairs(weapons) do
+            print(value)
+        end
+    end
+end
+
 local function toggleGodMode(ply, toggle)
     local log
     if(toggle) then
@@ -49,48 +63,32 @@ local function toggleInvisibility(ply, toggle)
             log = "  - Invisibility already [ON]!"
         else 
             log = "  - Invisibility turned [ON]!"
-            ply:SetNWBool("SP_NW_VISIBLE", true )
+            ply:SetNWBool("SP_NW_VISIBLE", true)
         end
     else
-        if(ply:GetNWBool("SP_NW_VISIBLE")) then 
+        if(not ply:GetNWBool("SP_NW_VISIBLE")) then 
             log = "  - Invisibility already [OFF]!"
         else 
             log = "  - Invisibility turned [OFF]!"
-            ply:SetNWBool("SP_NW_VISIBLE", false )
+            ply:SetNWBool("SP_NW_VISIBLE", false)
         end
     end
     return log
 end
 
-util.AddNetworkString("SP_NET_CL_SMODE_ENABLED")
-local function toggleSMode(ply)
-    ply:SetNWBool("SP_NW_SMODE_ENABLED", true)
+util.AddNetworkString("SP_NET_CL_SMODE_ACTIVE")
+local function toggleSMode(ply, toggle)
+    ply:SetNWBool("SP_NW_SMODE_ACTIVE", toggle)
 
     local loggedMessages = {}
-    table.insert(loggedMessages, "SMode turned [ON]!")
-    table.insert(loggedMessages, toggleGodMode(ply, true))
-    table.insert(loggedMessages, toggleNoClip(ply, true))
-    table.insert(loggedMessages, toggleInvisibility(ply, true))
+    table.insert(loggedMessages, "SMode turned [" .. (toggle and "ON" or "OFF") .. "]!")
+    table.insert(loggedMessages, toggleGodMode(ply, toggle))
+    table.insert(loggedMessages, toggleNoClip(ply, toggle))
+    table.insert(loggedMessages, toggleInvisibility(ply, toggle))
 
-    net.Start("SP_NET_CL_SMODE_ENABLED")
-        net.WriteUInt(#loggedMessages, 8)
-        for _, msg in ipairs(loggedMessages) do
-            net.WriteString(msg)
-        end
-    net.Send(ply)
-end
+    toggleWeapons(ply, not toggle)
 
-util.AddNetworkString("SP_NET_CL_S_DISABLED")
-local function unToggleSMode(ply)
-    ply:SetNWBool("SP_NW_SMODE_ENABLED", false)
-
-    local loggedMessages = {}
-    table.insert(loggedMessages, "SMode turned [OFF]!")
-    table.insert(loggedMessages, toggleGodMode(ply, false))
-    table.insert(loggedMessages, toggleNoClip(ply, false))
-    table.insert(loggedMessages, toggleInvisibility(ply, false ))
-
-    net.Start("SP_NET_CL_S_DISABLED")
+    net.Start("SP_NET_CL_SMODE_ACTIVE")
         net.WriteUInt(#loggedMessages, 8)
         for _, msg in ipairs(loggedMessages) do
             net.WriteString(msg)
@@ -103,9 +101,5 @@ net.Receive("SP_NET_SV_TURN_SMODE", function(len, ply)
     if not ply:IsValid() then return end
     local isActive = net.ReadBool()
 
-    if(isActive) then 
-        toggleSMode(ply)
-    else 
-        unToggleSMode(ply)
-    end
+    toggleSMode(ply, isActive)
 end)

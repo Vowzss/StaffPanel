@@ -1,6 +1,4 @@
-include("autorun/sh_init.lua")
-
-local closeKeyPressed = false
+closeKeyPressed = false
 local prevTime = 0
 
 function keyHandler(keyCode)
@@ -9,12 +7,11 @@ function keyHandler(keyCode)
         closeKeyPressed = true
         prevTime = UnPredictedCurTime()
 
-        print(keyCode)
-        /*if(isPanelOpenned) then
-            STAFF_PANEL:CloseFrame()
+        if(STAFF_PANEL.IsPanelOpenned()) then
+            STAFF_PANEL.ClosePanel()
         else
-            STAFF_PANEL:OpenFrame()
-        end*/
+            STAFF_PANEL.OpenPanel()
+        end
     end
 end
 
