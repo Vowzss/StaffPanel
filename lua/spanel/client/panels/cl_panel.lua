@@ -104,6 +104,11 @@ function STAFF_PANEL.OpenPanel()
         return 
     end
 
+    if(TICKET_PANEL.IsPanelOpenned()) then
+        chatLogger(LocalPlayer(), "Ticket Panel is openned! Closing...", SPANEL_ADDON_THEME.off_message)
+        TICKET_PANEL.ClosePanel()
+    end
+
     chatLogger(LocalPlayer(), "Openning Staff Panel!", SPANEL_ADDON_THEME.on_message)
     STAFF_PANEL.panelOpenned = true
 

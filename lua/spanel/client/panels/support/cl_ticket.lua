@@ -2,6 +2,7 @@ local PANEL_WIDTH = ScrW()*0.4
 local PANEL_HEIGHT = ScrH()*0.3
 
 local panelOpenned = false;
+local ticketInProgress = false;
 
 /*surface.CreateFont("gay_font", {
     font = "Roboto",
@@ -59,6 +60,7 @@ function TICKET_PANEL.DisplayFrameButtons()
         if(canSendTicket) then
             this.isActive = not this.isActive
             chatLogger(LocalPlayer(), "Ticket sucesfully sent! Support will be assissting you shortly!", Color(0,255,0))
+            ticketInProgress = true
         end
         /*net.Start("SP_NET_SV_TURN_SMODE")
         net.WriteBool(this.isActive)
@@ -119,6 +121,8 @@ function TICKET_PANEL.CreateFrame()
 end
 
 local function handleTextEntry(textEntry, currText, prevText, maxLength)
+    if(currText == "") then return nil end
+
     if(#currText > maxLength) then
         textEntry:SetTextColor(Color(255,0,0))
         return prevText
@@ -131,16 +135,18 @@ local function handleTextEntry(textEntry, currText, prevText, maxLength)
 end
 
 local function resetTextEntry(currText)
-    if(currText:GetValue() == fieldEmpty or currText:GetValue() == "") then
+    local curValue = currText:GetValue()
+    if(curValue == fieldEmpty or curValue == "") then
         return currText:SetValue("")
     end
+    return curValue
 end
 
 function TICKET_PANEL.DrawEntry() 
     TICKET_PANEL.TitleField = vgui.Create("DTextEntry", TICKET_PANEL.Frame)
     TICKET_PANEL.TitleField:SetPos((PANEL_WIDTH*0.1)/2, PANEL_HEIGHT - (PANEL_HEIGHT*0.66))
     TICKET_PANEL.TitleField:SetSize(250,nil)
-	TICKET_PANEL.TitleField:SetPlaceholderText("Ticket Title (max: 38)")
+	TICKET_PANEL.TitleField:SetPlaceholderText("Ticket Title (max: 39)")
     TICKET_PANEL.TitleField:SetDrawBorder(false)
     TICKET_PANEL.TitleField.OnGetFocus = function(self)
         TICKET_PANEL.savedTitle = resetTextEntry(self)
@@ -165,7 +171,7 @@ function TICKET_PANEL.DrawEntry()
     TICKET_PANEL.ReasonField = vgui.Create("DTextEntry", TICKET_PANEL.Frame)
     TICKET_PANEL.ReasonField:SetPos((PANEL_WIDTH*0.1)/2, PANEL_HEIGHT - (PANEL_HEIGHT*0.38))
     TICKET_PANEL.ReasonField:SetSize(250,nil)
-	TICKET_PANEL.ReasonField:SetPlaceholderText("Ticket Reason (max: 38)")
+	TICKET_PANEL.ReasonField:SetPlaceholderText("Ticket Reason (max: 39)")
     TICKET_PANEL.ReasonField.OnGetFocus = function(self)
         TICKET_PANEL.savedReason = resetTextEntry(self)
     end
@@ -194,7 +200,7 @@ function TICKET_PANEL.DrawFrame()
         surface.DrawRect(0, 0, width, height)
 
         surface.SetDrawColor(SPANEL_ADDON_THEME.main)
-        surface.DrawRect(0, 0, width, height/11)
+        surface.DrawRect(0, 0, width, height/13)
 
         surface.SetDrawColor(SPANEL_ADDON_THEME.main)
         surface.DrawRect(30, 60, width-60, height-140)
@@ -225,6 +231,11 @@ function TICKET_PANEL.OpenPanel()
     if(TICKET_PANEL.IsPanelOpenned()) then 
         chatLogger(LocalPlayer(), "Ticket Panel is already openned!", SPANEL_ADDON_THEME.off_message)
         return 
+    end
+
+    if(STAFF_PANEL.IsPanelOpenned()) then
+        chatLogger(LocalPlayer(), "Staff Panel is openned! Closing...", SPANEL_ADDON_THEME.off_message)
+        STAFF_PANEL.ClosePanel()
     end
 
     chatLogger(LocalPlayer(), "Openning Ticket Panel!", SPANEL_ADDON_THEME.on_message)
