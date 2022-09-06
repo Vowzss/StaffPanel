@@ -1,16 +1,21 @@
-closeKeyPressed = false
+keyPressed = false
 local prevTime = 0
 
 function keyHandler(keyCode)
-    closeKeyPressed = false
+    keyPressed = false
     if (keyCode == KEY_O and UnPredictedCurTime() > prevTime + 0.05) then
-        closeKeyPressed = true
+        keyPressed = true
         prevTime = UnPredictedCurTime()
+        if(STAFF_PANEL.IsPanelOpenned()) then STAFF_PANEL.ClosePanel()
+        else STAFF_PANEL.OpenPanel() 
+        end
+    end
 
-        if(STAFF_PANEL.IsPanelOpenned()) then
-            STAFF_PANEL.ClosePanel()
-        else
-            STAFF_PANEL.OpenPanel()
+    if (keyCode == KEY_P and UnPredictedCurTime() > prevTime + 0.05) then
+        keyPressed = true
+        prevTime = UnPredictedCurTime()
+        if(TICKET_PANEL.IsPanelOpenned()) then TICKET_PANEL.ClosePanel()
+        else TICKET_PANEL.OpenPanel() 
         end
     end
 end

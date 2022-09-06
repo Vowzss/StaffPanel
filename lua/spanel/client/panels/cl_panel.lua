@@ -66,7 +66,7 @@ end
 
 function STAFF_PANEL.CreateFrame()
     STAFF_PANEL.Frame = vgui.Create("DFrame")
-    STAFF_PANEL.Frame:SetTitle("SPanel - Manager | " .. (LocalPlayer():GetNWBool("SP_NW_SMODE_ENABLED") and "[Enabled]" or "[Disabled]"))
+    STAFF_PANEL.Frame:SetTitle("Staff Panel - Manager | " .. (LocalPlayer():GetNWBool("SP_NW_SMODE_ENABLED") and "[Enabled]" or "[Disabled]"))
     STAFF_PANEL.Frame:MakePopup(true)
     STAFF_PANEL.Frame:SetDeleteOnClose(true)
     STAFF_PANEL.Frame:SetSize(0, 0)
@@ -85,11 +85,11 @@ end
 
 function STAFF_PANEL.ClosePanel()
     if(not STAFF_PANEL.IsPanelOpenned()) then 
-        chatLogger(LocalPlayer(), "SPanel isn't openned!", SPANEL_ADDON_THEME.off_message)
+        chatLogger(LocalPlayer(), "Staff Panel isn't openned!", SPANEL_ADDON_THEME.off_message)
         return 
     end
     
-    chatLogger(LocalPlayer(), "Closing SPanel!", SPANEL_ADDON_THEME.off_message)
+    chatLogger(LocalPlayer(), "Closing Staff Panel!", SPANEL_ADDON_THEME.off_message)
     STAFF_PANEL.panelOpenned = false;
 
     STAFF_PANEL.Frame:ShowCloseButton(false)
@@ -100,11 +100,11 @@ concommand.Add("closeSPanel", STAFF_PANEL.ClosePanel)
 
 function STAFF_PANEL.OpenPanel()
     if(STAFF_PANEL.IsPanelOpenned()) then 
-        chatLogger(LocalPlayer(), "SPanel is already openned!", SPANEL_ADDON_THEME.off_message)
+        chatLogger(LocalPlayer(), "Staff Panel is already openned!", SPANEL_ADDON_THEME.off_message)
         return 
     end
 
-    chatLogger(LocalPlayer(), "Openning SPanel!", SPANEL_ADDON_THEME.on_message)
+    chatLogger(LocalPlayer(), "Openning Staff Panel!", SPANEL_ADDON_THEME.on_message)
     STAFF_PANEL.panelOpenned = true
 
     STAFF_PANEL.CreateFrame()
@@ -117,7 +117,7 @@ function STAFF_PANEL.OpenPanel()
     STAFF_PANEL.HandleFrameKeys(STAFF_PANEL.Frame)
 
     STAFF_PANEL.Frame.OnClose = function()
-        if(not closeKeyPressed) then STAFF_PANEL.ClosePanel() end
+        if(not keyPressed) then STAFF_PANEL.ClosePanel() end
     end
 end
 concommand.Add("openSPanel", STAFF_PANEL.OpenPanel)
@@ -125,7 +125,7 @@ concommand.Add("openSPanel", STAFF_PANEL.OpenPanel)
 net.Receive("SP_NET_CL_SMODE_ACTIVE", function(len, ply)
     local isActive = LocalPlayer():GetNWBool("SP_NW_SMODE_ACTIVE")
 
-    STAFF_PANEL.Frame:SetTitle("SPanel - Manager | [" .. (isActive and "Enabled" or "Disabled") .. "]")
+    STAFF_PANEL.Frame:SetTitle("Staff Panel - Manager | [" .. (isActive and "Enabled" or "Disabled") .. "]")
 
     local color = isActive and SPANEL_ADDON_THEME.on_message or SPANEL_ADDON_THEME.off_message
     local loggedLength = net.ReadUInt(8)
