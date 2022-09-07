@@ -2,14 +2,18 @@ local PANEL_WIDTH = ScrW()*0.4
 local PANEL_HEIGHT = ScrH()*0.3
 
 local panelOpenned = false;
-local ticketInProgress = false;
 
-/*surface.CreateFont("gay_font", {
+surface.CreateFont("roboto_font", {
     font = "Roboto",
     size = 25,
     weight = 700,
-    underline =
-})*/
+})
+
+surface.CreateFont("roboto_font_20", {
+    font = "Roboto",
+    size = 20,
+    weight = 700,
+})
 
 local fieldEmpty = "You must fill this field!"
 
@@ -59,12 +63,17 @@ function TICKET_PANEL.DisplayFrameButtons()
 
         if(canSendTicket) then
             this.isActive = not this.isActive
-            chatLogger(LocalPlayer(), "Ticket sucesfully sent! Support will be assissting you shortly!", Color(0,255,0))
-            ticketInProgress = true
+            if(LocalPlayer():GetNWBool("ticketInProgress")) then
+                chatLogger(LocalPlayer(), "You already have a pending ticket! Wait for it to be solved...", Color(255,0,0))
+            else
+                chatLogger(LocalPlayer(), "Ticket sucesfully sent! Support will be assissting you shortly...", Color(0,255,0))
+                LocalPlayer():SetNWBool("ticketInProgress", true)
+
+                /*net.Start("SP_NET_SV_TURN_SMODE")
+                net.WriteBool(this.isActive)
+                net.SendToServer()*/
+            end
         end
-        /*net.Start("SP_NET_SV_TURN_SMODE")
-        net.WriteBool(this.isActive)
-        net.SendToServer()*/
     end
 
     TICKET_PANEL.savedTitle = nil
@@ -142,60 +151,52 @@ local function resetTextEntry(currText)
     return curValue
 end
 
+local function drawTextEntry(self, width, height, textHeight, displayText)
+    surface.SetDrawColor(SPANEL_ADDON_THEME.background)
+    surface.DrawRect(0, 0, width, height)
+
+    if(self:GetValue() == "") then
+        draw.DrawText(displayText, "roboto_font_20", 5, textHeight+2, Color(167,154,154))
+    elseif (self:GetValue() == fieldEmpty) then
+        draw.DrawText(self:GetValue(), "roboto_font_20", 5, textHeight+2, Color(255,0,0), 0)
+    else
+        draw.DrawText(self:GetValue(), "roboto_font_20", 5, textHeight, Color(255,255,255), 0)
+    end
+end
+
 function TICKET_PANEL.DrawEntry() 
     TICKET_PANEL.TitleField = vgui.Create("DTextEntry", TICKET_PANEL.Frame)
     TICKET_PANEL.TitleField:SetPos((PANEL_WIDTH*0.1)/2, PANEL_HEIGHT - (PANEL_HEIGHT*0.66))
     TICKET_PANEL.TitleField:SetSize(250,nil)
-	TICKET_PANEL.TitleField:SetPlaceholderText("Ticket Title (max: 39)")
-    TICKET_PANEL.TitleField:SetDrawBorder(false)
-    TICKET_PANEL.TitleField.OnGetFocus = function(self)
-        TICKET_PANEL.savedTitle = resetTextEntry(self)
-    end
-
-    TICKET_PANEL.TitleField.OnTextChanged = function(self)
-        TICKET_PANEL.savedTitle = handleTextEntry(TICKET_PANEL.TitleField, self:GetValue(), TICKET_PANEL.savedTitle, 38)
-    end
+    TICKET_PANEL.TitleField.OnGetFocus = function(self) TICKET_PANEL.savedTitle = resetTextEntry(self) end
+    TICKET_PANEL.TitleField.OnTextChanged = function(self) TICKET_PANEL.savedTitle = handleTextEntry(TICKET_PANEL.TitleField, self:GetValue(), TICKET_PANEL.savedTitle, 38)  end
+    TICKET_PANEL.TitleField.Paint = function(self, width, height) drawTextEntry(self, width, height, height/7, "Ticket Title (max: 39)") end
 
     TICKET_PANEL.SteamField = vgui.Create("DTextEntry", TICKET_PANEL.Frame)
     TICKET_PANEL.SteamField:SetPos((PANEL_WIDTH*0.1)/2, PANEL_HEIGHT - (PANEL_HEIGHT*0.52))
     TICKET_PANEL.SteamField:SetSize(250,nil)
-	TICKET_PANEL.SteamField:SetPlaceholderText("Player SteamID (max: 17)")
-    TICKET_PANEL.SteamField.OnGetFocus = function(self)
-        TICKET_PANEL.savedSteam = resetTextEntry(self)
-    end
-
-	TICKET_PANEL.SteamField.OnTextChanged = function(self)
-        TICKET_PANEL.savedSteam = handleTextEntry(TICKET_PANEL.SteamField, self:GetValue(), TICKET_PANEL.savedSteam, 17)
-    end
+    TICKET_PANEL.SteamField.OnGetFocus = function(self) TICKET_PANEL.savedSteam = resetTextEntry(self) end
+	TICKET_PANEL.SteamField.OnTextChanged = function(self) TICKET_PANEL.savedSteam = handleTextEntry(TICKET_PANEL.SteamField, self:GetValue(), TICKET_PANEL.savedSteam, 17) end
+    TICKET_PANEL.SteamField.Paint = function(self, width, height) drawTextEntry(self, width, height, height/7, "Player's SteamID (max: 17)") end
 
     TICKET_PANEL.ReasonField = vgui.Create("DTextEntry", TICKET_PANEL.Frame)
     TICKET_PANEL.ReasonField:SetPos((PANEL_WIDTH*0.1)/2, PANEL_HEIGHT - (PANEL_HEIGHT*0.38))
     TICKET_PANEL.ReasonField:SetSize(250,nil)
-	TICKET_PANEL.ReasonField:SetPlaceholderText("Ticket Reason (max: 39)")
-    TICKET_PANEL.ReasonField.OnGetFocus = function(self)
-        TICKET_PANEL.savedReason = resetTextEntry(self)
-    end
-
-	TICKET_PANEL.ReasonField.OnTextChanged = function(self)
-        TICKET_PANEL.savedReason = handleTextEntry(TICKET_PANEL.ReasonField, self:GetValue(), TICKET_PANEL.savedReason, 38)
-    end
+    TICKET_PANEL.ReasonField.OnGetFocus = function(self) TICKET_PANEL.savedReason = resetTextEntry(self) end
+	TICKET_PANEL.ReasonField.OnTextChanged = function(self) TICKET_PANEL.savedReason = handleTextEntry(TICKET_PANEL.ReasonField, self:GetValue(), TICKET_PANEL.savedReason, 38) end
+    TICKET_PANEL.ReasonField.Paint = function(self, width, height) drawTextEntry(self, width, height, height/7, "Ticket Reason (max: 39)") end
 
     TICKET_PANEL.InfoField = vgui.Create("DTextEntry", TICKET_PANEL.Frame)
     TICKET_PANEL.InfoField:SetPos((PANEL_WIDTH*0.8)/2, PANEL_HEIGHT - (PANEL_HEIGHT*0.66))
     TICKET_PANEL.InfoField:SetSize(420,nil)
-	TICKET_PANEL.InfoField:SetPlaceholderText("Ticket Explanations (max: 355)")
     TICKET_PANEL.InfoField:SetMultiline(true)
-    TICKET_PANEL.InfoField.OnGetFocus = function(self)
-        TICKET_PANEL.savedInfo = resetTextEntry(self)
-    end
-
-    TICKET_PANEL.InfoField.OnTextChanged = function(self)
-        TICKET_PANEL.savedInfo = handleTextEntry(TICKET_PANEL.InfoField, self:GetValue(), TICKET_PANEL.savedInfo, 355)
-    end
+    TICKET_PANEL.InfoField.OnGetFocus = function(self) TICKET_PANEL.savedInfo = resetTextEntry(self) end
+    TICKET_PANEL.InfoField.OnTextChanged = function(self) TICKET_PANEL.savedInfo = handleTextEntry(TICKET_PANEL.InfoField, self:GetValue(), TICKET_PANEL.savedInfo, 355) end
+    TICKET_PANEL.InfoField.Paint = function(self, width, height) drawTextEntry(self, width, height, 5, "Ticket Explanations (max: 355)") end
 end
 
 function TICKET_PANEL.DrawFrame()
-    TICKET_PANEL.Frame.Paint = function(this, width, height)
+    TICKET_PANEL.Frame.Paint = function(self, width, height)
         surface.SetDrawColor(SPANEL_ADDON_THEME.background)
         surface.DrawRect(0, 0, width, height)
 
