@@ -1,8 +1,6 @@
 local PANEL_WIDTH = ScrW()*0.4
 local PANEL_HEIGHT = ScrH()*0.4
 
-local panelOpenned = false;
-
 function STAFF_PANEL.DisplayFrameButtons()
     toggleSMode = STAFF_PANEL.Frame:Add("DButton")
     toggleSMode:SetPos(10, 35)

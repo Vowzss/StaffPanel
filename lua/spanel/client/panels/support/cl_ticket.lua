@@ -1,8 +1,6 @@
 local PANEL_WIDTH = ScrW()*0.4
 local PANEL_HEIGHT = ScrH()*0.3
 
-local panelOpenned = false;
-
 surface.CreateFont("roboto_font", {
     font = "Roboto",
     size = 25,
@@ -17,6 +15,14 @@ surface.CreateFont("roboto_font_20", {
 
 local fieldEmpty = "You must fill this field!"
 
+local function displayFieldError(value, field) 
+    if(value == nil) then
+        field:SetTextColor(Color(255,0,0))
+        field:SetValue(fieldEmpty)
+        LocalPlayer():SetNWBool("canSendTicket", false)
+    end
+end
+
 function TICKET_PANEL.DisplayFrameButtons()
     TICKET_PANEL.SendTicket = vgui.Create("DButton", TICKET_PANEL.Frame)
     TICKET_PANEL.SendTicket:SetPos(PANEL_WIDTH/2-(PANEL_WIDTH*0.3)/2, PANEL_HEIGHT - (PANEL_HEIGHT*0.15) - (PANEL_HEIGHT*0.06))
@@ -24,11 +30,7 @@ function TICKET_PANEL.DisplayFrameButtons()
     TICKET_PANEL.SendTicket:SetText("")
     TICKET_PANEL.SendTicket.Paint = function(this, width, height)
         surface.SetDrawColor(SPANEL_ADDON_THEME.main)
-        
-        if (this:IsHovered()) then
-            surface.SetDrawColor(SPANEL_ADDON_THEME.hover)
-        end
-        
+        if (this:IsHovered()) then surface.SetDrawColor(SPANEL_ADDON_THEME.hover) end
         surface.DrawRect(0,0,width,height)
 
         if (this:IsHovered()) then
@@ -39,29 +41,15 @@ function TICKET_PANEL.DisplayFrameButtons()
     end
 
     TICKET_PANEL.SendTicket.DoClick = function(this)
-        local canSendTicket = true
-        if(TICKET_PANEL.savedTitle == nil) then
-            TICKET_PANEL.TitleField:SetTextColor(Color(255,0,0))
-            TICKET_PANEL.TitleField:SetValue(fieldEmpty)
-            canSendTicket = false
-        end
-        if(TICKET_PANEL.savedInfo == nil) then
-            TICKET_PANEL.InfoField:SetTextColor(Color(255,0,0))
-            TICKET_PANEL.InfoField:SetValue(fieldEmpty)
-            canSendTicket = false
-        end
-        if(TICKET_PANEL.savedSteam == nil) then
-            TICKET_PANEL.SteamField:SetTextColor(Color(255,0,0))
-            TICKET_PANEL.SteamField:SetValue(fieldEmpty)
-            canSendTicket = false
-        end
-        if(TICKET_PANEL.savedReason == nil) then
-            TICKET_PANEL.ReasonField:SetTextColor(Color(255,0,0))
-            TICKET_PANEL.ReasonField:SetValue(fieldEmpty)
-            canSendTicket = false
-        end
+        LocalPlayer():SetNWBool("canSendTicket", true)
 
-        if(canSendTicket) then
+        displayFieldError(TICKET_PANEL.savedTitle, TICKET_PANEL.TitleField)
+        displayFieldError(TICKET_PANEL.savedInfo, TICKET_PANEL.InfoField)
+        displayFieldError(TICKET_PANEL.savedSteam, TICKET_PANEL.SteamField)
+        displayFieldError(TICKET_PANEL.savedReason, TICKET_PANEL.ReasonField)
+
+
+        if(LocalPlayer():GetNWBool("canSendTicket")) then
             this.isActive = not this.isActive
             if(LocalPlayer():GetNWBool("ticketInProgress")) then
                 chatLogger(LocalPlayer(), "You already have a pending ticket! Wait for it to be solved...", Color(255,0,0))
@@ -69,9 +57,15 @@ function TICKET_PANEL.DisplayFrameButtons()
                 chatLogger(LocalPlayer(), "Ticket sucesfully sent! Support will be assissting you shortly...", Color(0,255,0))
                 LocalPlayer():SetNWBool("ticketInProgress", true)
 
-                /*net.Start("SP_NET_SV_TURN_SMODE")
-                net.WriteBool(this.isActive)
-                net.SendToServer()*/
+                net.Start("SP_NET_SV_REGISTER_TICKET")
+                net.WriteString(TICKET_PANEL.savedTitle)
+                net.WriteString(TICKET_PANEL.savedSteam)
+                net.WriteString(TICKET_PANEL.savedReason)
+                net.WriteString(TICKET_PANEL.savedInfo)
+                net.SendToServer()
+
+                TICKET_PANEL.ClosePanel()
+                TICKET.OpenPanel()
             end
         end
     end
