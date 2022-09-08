@@ -18,14 +18,6 @@ function keyHandler(keyCode)
         else TICKET_PANEL.OpenPanel() 
         end
     end
-
-    if (keyCode == KEY_I and UnPredictedCurTime() > prevTime + 0.05) then
-        keyPressed = true
-        prevTime = UnPredictedCurTime()
-        if(TICKET.IsPanelOpenned()) then TICKET.ClosePanel()
-        else TICKET.OpenPanel() 
-        end
-    end
 end
 
 hook.Add("PlayerButtonDown", "SP_HK_BUTTON_DOWN", function(ply, keyCode)

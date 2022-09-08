@@ -10,14 +10,16 @@ surface.CreateFont("roboto_font_13", {
 })
 
 function TICKET.CreateFrame()
+    LocalPlayer():SetNWString("playerName", "Augustin DeBourguisson")
+
     TICKET.Frame = vgui.Create("DFrame")
-    TICKET.Frame:SetTitle("Openned Ticket")
-    //TICKET.Frame:MakePopup(true)
+    TICKET.Frame:SetTitle("Ticket - " .. LocalPlayer():GetNWString("playerName") .. " - [Waiting...]")
     TICKET.Frame:SetDeleteOnClose(true)
     TICKET.Frame:ShowCloseButton(false)
     TICKET.Frame:SetDraggable(false)
     TICKET.Frame:SetSize(PANEL_WIDTH, PANEL_HEIGHT)
     TICKET.Frame:SetPos(5,5)
+    LocalPlayer():SetNWBool("ticketInProgress", false)
 end
 
 function TICKET.IsPanelOpenned()
@@ -41,7 +43,13 @@ function TICKET.DisplayFrameButtons()
         end
     end
     TICKET.ClaimTicket.DoClick = function(this)
-        //LocalPlayer():SetNWBool("canSendTicket", false)
+        if(not LocalPlayer():GetNWBool("ticketInProgress")) then
+            LocalPlayer():SetNWBool("ticketInProgress", true)
+            TICKET.Frame:SetTitle("Ticket - " .. LocalPlayer():GetNWString("playerName") .. " - [In Progress...]")
+            chatLogger(LocalPlayer(), "Ticket claimed! Support will arrive shortly...", Color(0,255,0))
+        else
+            chatLogger(LocalPlayer(), "Ticket claimed! Support will arrive shortly...", Color(255,0,0))
+        end
     end
 
     TICKET.CancelTicket = vgui.Create("DButton", TICKET.Frame)
@@ -59,8 +67,10 @@ function TICKET.DisplayFrameButtons()
             draw.SimpleText("Cancel Ticket", "roboto_font_13", width*0.5, height*0.5, color_white, TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER)
         end
     end
+
     TICKET.CancelTicket.DoClick = function(this)
-        //LocalPlayer():SetNWBool("ticketInProgress", false)
+        LocalPlayer():SetNWBool("ticketInProgress", false)
+        TICKET.ClosePanel()
     end
 end
 
@@ -69,7 +79,11 @@ function TICKET.DrawFrame()
         surface.SetDrawColor(SPANEL_ADDON_THEME.background)
         surface.DrawRect(0, 0, width, height)
 
-        surface.SetDrawColor(SPANEL_ADDON_THEME.main)
+        if(LocalPlayer():GetNWBool("ticketInProgress")) then
+            surface.SetDrawColor(Color(0,0,255))
+        else
+            surface.SetDrawColor(SPANEL_ADDON_THEME.main)
+        end
         surface.DrawRect(0, 0, width, height/4.5)
 
         surface.SetDrawColor(SPANEL_ADDON_THEME.main)
@@ -82,40 +96,34 @@ end
 
 function TICKET.ClosePanel()
     if(not TICKET.IsPanelOpenned()) then 
-        chatLogger(LocalPlayer(), "Ticket Panel isn't openned!", SPANEL_ADDON_THEME.off_message)
+        chatLogger(LocalPlayer(), "Ticket isn't openned!", SPANEL_ADDON_THEME.off_message)
         return 
     end
 
-    chatLogger(LocalPlayer(), "Closing Ticket Panel!", SPANEL_ADDON_THEME.off_message)
+    chatLogger(LocalPlayer(), "Closing Ticket!", SPANEL_ADDON_THEME.off_message)
     TICKET.panelOpenned = false
+    TICKET.Frame:Close()
 end
 
-function TICKET.OpenPanel()
+function TICKET.OpenPanel(title, steamid, reason, info)
     if(TICKET.IsPanelOpenned()) then 
-        chatLogger(LocalPlayer(), "Ticket Panel is already openned!", SPANEL_ADDON_THEME.off_message)
+        chatLogger(LocalPlayer(), "Ticket is already openned!", SPANEL_ADDON_THEME.off_message)
         return 
     end
 
-    if(TICKET.IsPanelOpenned()) then
-        chatLogger(LocalPlayer(), "Staff Panel is openned! Closing...", SPANEL_ADDON_THEME.off_message)
-        TICKET.ClosePanel()
-    end
-
-    chatLogger(LocalPlayer(), "Openning Ticket Panel!", SPANEL_ADDON_THEME.on_message)
+    chatLogger(LocalPlayer(), "Openning Ticket!", SPANEL_ADDON_THEME.on_message)
     TICKET.panelOpenned = true
 
     TICKET.CreateFrame()
     TICKET.DrawFrame()
     TICKET.DisplayFrameButtons()
-
-    TICKET.Frame.OnClose = function()
-        if(keyPressed) then return end
-        TICKET.ClosePanel()
-    end
 end
 
-function TICKET.HandleFrameKeys(frame)
-    frame.OnKeyCodePressed = function(self, key) 
-        keyHandler(key) 
-    end
-end
+net.Receive("SP_NET_CL_REGISTER_TICKET", function(len, ply)
+    local title = net.ReadString()
+    local steamid = net.ReadString()
+    local reason = net.ReadString()
+    local info = net.ReadString()
+    
+    TICKET.OpenPanel(title, steamid, reason, info)
+end)
