@@ -98,7 +98,7 @@ end
 
 util.AddNetworkString("SP_NET_SV_TURN_SMODE")
 net.Receive("SP_NET_SV_TURN_SMODE", function(len, ply)
-    if not ply:IsValid() then return end
+    if not IsValid(ply) then return end
     local isActive = net.ReadBool()
 
     toggleSMode(ply, isActive)

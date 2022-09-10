@@ -16,7 +16,7 @@ end
 
 util.AddNetworkString("SP_NET_SV_REGISTER_TICKET")
 net.Receive("SP_NET_SV_REGISTER_TICKET", function(len, ply)
-    if not ply:IsValid() then return end
+    if not IsValid(ply) then return end
     local title = net.ReadString()
     local steamid = net.ReadString()
     local reason = net.ReadString()
