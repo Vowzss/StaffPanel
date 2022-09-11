@@ -1,79 +1,100 @@
-SPANEL_ADDON_CONFIG = {
-    ["name"] = "SPanel",
-    ["author"] = "NoIdeaIndustry",
-    ["version"] = "1.0.0",
-    ["website"] = "https://noideaindustry.com",
-
-    ["logger"] = "[Logger - SPanel]",
-}
-
-SPANEL_ADDON_THEME = {
-    ["logger_color"] = Color(235, 188, 186),
-
-    ["main"] = Color(210, 144, 52),
-    ["background"] = Color(52, 52, 52),
-	["hover"] = Color(32,31,29),
-
-    ["on_message"] = Color(196, 167, 231),
-    ["off_message"] = Color(235, 111, 146),
-}
-
-STAFF_PANEL = {}
-TICKET_PANEL = {}
-
 local rootDirectory = "spanel"
-
-if( SERVER ) then
-    print()
-    print("------------------------------------")
-    print("-----------    " .. SPANEL_ADDON_CONFIG.name .. "    -----------")
-    print("-------    " .. SPANEL_ADDON_CONFIG.author .. "    -------")
-    print("-    " .. SPANEL_ADDON_CONFIG.website .. "    -")
-    print("------------------------------------")
-    print()
-
-    print("Successfully loaded " .. SPANEL_ADDON_CONFIG.name .. " ver: " .. SPANEL_ADDON_CONFIG.version)
-    print()
-end
+local configDirectory = rootDirectory .. "/config"
 
 local function AddFile( File, directory )
 	local prefix = string.lower( string.Left( File, 3 ) )
-
-	if ( SERVER and prefix == "sv_" ) then
-		include( directory .. File )
-		print( "[SPanel] SERVER INCLUDE: " .. File )
-	elseif ( prefix == "sh_" ) then
+	if (SERVER and prefix == "sv_") then
+		include(directory .. File)
+		print("[SPanel] SERVER INCLUDE: " .. File)
+	elseif (prefix == "sh_") then
 		if (SERVER) then
-			AddCSLuaFile( directory .. File )
-			print( "[SPanel] SHARED ADDCS: " .. File )
+			AddCSLuaFile(directory .. File)
+			print("[SPanel] SHARED ADDCS: " .. File)
 		end
-		include( directory .. File )
-		print( "[SPanel] SHARED INCLUDE: " .. File )
+		include(directory .. File)
+		print("[SPanel] SHARED INCLUDE: " .. File)
+	elseif (prefix == "cfg") then
+		if (SERVER) then
+			AddCSLuaFile(directory .. File)
+			print("[SPanel] CONFIG ADDCS: " .. File)
+		end
+		include(directory .. File)
+		print("[SPanel] CONFIG INCLUDE: " .. File)
 	elseif (prefix == "cl_") then
-		if ( SERVER ) then
-			AddCSLuaFile( directory .. File )
-			print( "[SPanel] CLIENT ADDCS: " .. File )
-		elseif ( CLIENT ) then
-			include( directory .. File )
-			print( "[SPanel] CLIENT INCLUDE: " .. File )
+		if (SERVER) then
+			AddCSLuaFile(directory .. File)
+			print("[SPanel] CLIENT ADDCS: " .. File)
+		elseif (CLIENT) then
+			include(directory .. File)
+			print("[SPanel] CLIENT INCLUDE: " .. File)
 		end
 	end
 end
 
-local function IncludeDir( directory )
+local function IncludeCfg(directory)
 	directory = directory .. "/"
+	
+	local files, directories = file.Find(directory .. "*", "LUA")
 
-	local files, directories = file.Find( directory .. "*", "LUA" )
-
-	for _, v in ipairs( files ) do
-		if (string.EndsWith( v, ".lua" )) then
-			AddFile( v, directory )
+	for _, v in ipairs(files) do
+		if (string.EndsWith(v, ".lua")) then
+			AddFile(v, directory)
 		end
 	end
 
-	for _, v in ipairs( directories ) do
-		IncludeDir( directory .. v )
+	for _, v in ipairs(directories) do
+		IncludeCfg(directory .. v)
+	end
+end
+
+IncludeCfg(configDirectory)
+hook.Run("ConfigLoading")
+
+local function IncludeDir(directory)
+	directory = directory .. "/"
+
+	local files, directories = file.Find(directory .. "*", "LUA")
+
+	for _, v in ipairs(files) do
+		if (string.EndsWith(v, ".lua")) then
+			AddFile(v, directory)
+		end
+	end
+
+	for _, v in ipairs( directories) do
+		IncludeDir(directory .. v)
 	end
 end
 
 IncludeDir(rootDirectory)
+hook.Run("ConfigLoaded")
+
+hook.Add("ConfigLoading", "SP_HK_CONFIG_LOADING", function()
+	if(SERVER) then
+		print()
+		print("------------------------------------")
+		print("-----------    " .. SP_ADDON_CONFIG.name .. "    -----------")
+		print("-------    " .. SP_ADDON_CONFIG.author .. "    -------")
+		print("-    " .. SP_ADDON_CONFIG.website .. "    -")
+		print("------------------------------------")
+		print()
+	
+		print("Loading " .. SP_ADDON_CONFIG.name .. " ver: " .. SP_ADDON_CONFIG.version .. " ..........")
+		print()
+	end
+end)
+
+hook.Add("ConfigLoaded", "SP_HK_CONFIG_LOADED", function()
+	if(SERVER) then
+		print()
+		print("------------------------------------")
+		print("-----------    " .. SP_ADDON_CONFIG.name .. "    -----------")
+		print("-------    " .. SP_ADDON_CONFIG.author .. "    -------")
+		print("-    " .. SP_ADDON_CONFIG.website .. "    -")
+		print("------------------------------------")
+		print()
+	
+		print("Successfully loaded " .. SP_ADDON_CONFIG.name .. " ver: " .. SP_ADDON_CONFIG.version)
+		print()
+	end
+end)

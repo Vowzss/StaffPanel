@@ -22,30 +22,30 @@ local function displayFieldError(field)
     end
 end
 
-function TICKET_PANEL.DisplayFrameButtons()
-    TICKET_PANEL.SendTicket = vgui.Create("DButton", TICKET_PANEL.Frame)
-    TICKET_PANEL.SendTicket:SetPos(PANEL_WIDTH/2-(PANEL_WIDTH*0.3)/2, PANEL_HEIGHT - (PANEL_HEIGHT*0.15) - (PANEL_HEIGHT*0.06))
-    TICKET_PANEL.SendTicket:SetSize((PANEL_WIDTH*0.3),(PANEL_HEIGHT*0.15))
-    TICKET_PANEL.SendTicket:SetText("")
-    TICKET_PANEL.SendTicket.Paint = function(this, width, height)
-        surface.SetDrawColor(SPANEL_ADDON_THEME.main)
-        if (this:IsHovered()) then surface.SetDrawColor(SPANEL_ADDON_THEME.hover) end
+function SP_TICKET_PANEL.DisplayFrameButtons()
+    SP_TICKET_PANEL.SendTicket = vgui.Create("DButton", SP_TICKET_PANEL.Frame)
+    SP_TICKET_PANEL.SendTicket:SetPos(PANEL_WIDTH/2-(PANEL_WIDTH*0.3)/2, PANEL_HEIGHT - (PANEL_HEIGHT*0.15) - (PANEL_HEIGHT*0.06))
+    SP_TICKET_PANEL.SendTicket:SetSize((PANEL_WIDTH*0.3),(PANEL_HEIGHT*0.15))
+    SP_TICKET_PANEL.SendTicket:SetText("")
+    SP_TICKET_PANEL.SendTicket.Paint = function(this, width, height)
+        surface.SetDrawColor(SP_ADDON_THEME.main)
+        if (this:IsHovered()) then surface.SetDrawColor(SP_ADDON_THEME.hover) end
         surface.DrawRect(0, 0, width, height)
 
         if (this:IsHovered()) then
-            draw.SimpleText("Send Ticket!", "roboto_font", width*0.5, height*0.5, SPANEL_ADDON_THEME.main, TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER)
+            draw.SimpleText("Send Ticket!", "roboto_font", width*0.5, height*0.5, SP_ADDON_THEME.main, TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER)
         else
             draw.SimpleText("Send Ticket!", "roboto_font", width*0.5, height*0.5, color_white, TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER)
         end
     end
 
-    TICKET_PANEL.SendTicket.DoClick = function(this)
+    SP_TICKET_PANEL.SendTicket.DoClick = function(this)
         LocalPlayer():SetNWBool("canSendTicket", true)
 
-        displayFieldError(TICKET_PANEL.TitleField)
-        displayFieldError(TICKET_PANEL.InfoField)
-        displayFieldError(TICKET_PANEL.SteamField)
-        displayFieldError(TICKET_PANEL.ReasonField)
+        displayFieldError(SP_TICKET_PANEL.TitleField)
+        displayFieldError(SP_TICKET_PANEL.InfoField)
+        displayFieldError(SP_TICKET_PANEL.SteamField)
+        displayFieldError(SP_TICKET_PANEL.ReasonField)
 
 
         if(LocalPlayer():GetNWBool("canSendTicket")) then
@@ -57,40 +57,40 @@ function TICKET_PANEL.DisplayFrameButtons()
                 LocalPlayer():SetNWBool("ticketInProgress", true)
 
                 net.Start("SP_NET_SV_REGISTER_TICKET")
-                net.WriteString(TICKET_PANEL.TitleField.saved)
-                net.WriteString(TICKET_PANEL.SteamField.saved)
-                net.WriteString(TICKET_PANEL.ReasonField.saved)
-                net.WriteString(TICKET_PANEL.InfoField.saved)
+                net.WriteString(SP_TICKET_PANEL.TitleField.saved)
+                net.WriteString(SP_TICKET_PANEL.SteamField.saved)
+                net.WriteString(SP_TICKET_PANEL.ReasonField.saved)
+                net.WriteString(SP_TICKET_PANEL.InfoField.saved)
                 net.SendToServer()
 
-                TICKET_PANEL.ClosePanel()
+                SP_TICKET_PANEL.ClosePanel()
             end
         end
     end
 
-    TICKET_PANEL.TitleField.saved = nil
-    TICKET_PANEL.InfoField.saved  = nil
-    TICKET_PANEL.SteamField.saved  = nil 
-    TICKET_PANEL.ReasonField.saved  = nil
+    SP_TICKET_PANEL.TitleField.saved = nil
+    SP_TICKET_PANEL.InfoField.saved  = nil
+    SP_TICKET_PANEL.SteamField.saved  = nil 
+    SP_TICKET_PANEL.ReasonField.saved  = nil
 end
 
-function TICKET_PANEL.IsPanelOpenned()
-    return TICKET_PANEL.panelOpenned
+function SP_TICKET_PANEL.IsPanelOpenned()
+    return SP_TICKET_PANEL.panelOpenned
 end
 
-function TICKET_PANEL.HandleFrameResize(height, frame)
+function SP_TICKET_PANEL.HandleFrameResize(height, frame)
     frame.OnSizeChanged = function(this, width, height) 
         if (isAnimating) then
             this:Center()
         end
-        TICKET_PANEL.TitleField:SetTall(height * 0.1)
-        TICKET_PANEL.ReasonField:SetTall(height * 0.1)
-        TICKET_PANEL.SteamField:SetTall(height * 0.1)
-        TICKET_PANEL.InfoField:SetTall(height * 0.378)
+        SP_TICKET_PANEL.TitleField:SetTall(height * 0.1)
+        SP_TICKET_PANEL.ReasonField:SetTall(height * 0.1)
+        SP_TICKET_PANEL.SteamField:SetTall(height * 0.1)
+        SP_TICKET_PANEL.InfoField:SetTall(height * 0.378)
     end
 end
 
-function TICKET_PANEL.HandleFrameAnimation(width, height, frame)
+function SP_TICKET_PANEL.HandleFrameAnimation(width, height, frame)
     local animTime, animeDelay, animeEase = 1, 0, 0.2
 
     local isAnimating = true;
@@ -106,19 +106,19 @@ function TICKET_PANEL.HandleFrameAnimation(width, height, frame)
     end
 end
 
-function TICKET_PANEL.HandleFrameKeys(frame)
+function SP_TICKET_PANEL.HandleFrameKeys(frame)
     frame.OnKeyCodePressed = function(self, key) 
         keyHandler(key) 
     end
 end
 
-function TICKET_PANEL.CreateFrame()
-    TICKET_PANEL.Frame = vgui.Create("DFrame")
-    TICKET_PANEL.Frame:SetTitle("Ticket Panel")
-    TICKET_PANEL.Frame:MakePopup(true)
-    TICKET_PANEL.Frame:SetDeleteOnClose(true)
-    TICKET_PANEL.Frame:SetSize(0, 0)
-    TICKET_PANEL.Frame:Center()
+function SP_TICKET_PANEL.CreateFrame()
+    SP_TICKET_PANEL.Frame = vgui.Create("DFrame")
+    SP_TICKET_PANEL.Frame:SetTitle("Ticket Panel")
+    SP_TICKET_PANEL.Frame:MakePopup(true)
+    SP_TICKET_PANEL.Frame:SetDeleteOnClose(true)
+    SP_TICKET_PANEL.Frame:SetSize(0, 0)
+    SP_TICKET_PANEL.Frame:Center()
 end
 
 local function focusEntry(self, saved)
@@ -130,10 +130,11 @@ local function focusEntry(self, saved)
 end
 
 local function drawEntry(self, width, height, textHeight, field)
-    surface.SetDrawColor(SPANEL_ADDON_THEME.background)
+    surface.SetDrawColor(SP_ADDON_THEME.background)
     surface.DrawRect(0, 0, width, height)
     
     local curValue = self:GetValue()
+    //SP_TICKET_PANEL.ReasonField:SetText("")
 
     if(curValue == "" and not self.focus) then
         draw.DrawText(field.hint, "roboto_font_20", 5, textHeight, Color(167,154,154), 0)
@@ -147,63 +148,59 @@ local function drawEntry(self, width, height, textHeight, field)
     end
 end
 
-function TICKET_PANEL.DrawCombo()
-    TICKET_PANEL.ReasonField = vgui.Create("DComboBox",  TICKET_PANEL.Frame)
-    TICKET_PANEL.ReasonField:SetPos((PANEL_WIDTH*0.1)/2, PANEL_HEIGHT - (PANEL_HEIGHT*0.38))
-    TICKET_PANEL.ReasonField:SetSize(250,nil)
-    TICKET_PANEL.ReasonField:SetSortItems(false)
-    TICKET_PANEL.ReasonField.hint = "Ticket Reason"
+function SP_TICKET_PANEL.DrawCombo()
+    SP_TICKET_PANEL.ReasonField = vgui.Create("DComboBox",  SP_TICKET_PANEL.Frame)
+    SP_TICKET_PANEL.ReasonField:SetPos((PANEL_WIDTH*0.1)/2, PANEL_HEIGHT - (PANEL_HEIGHT*0.38))
+    SP_TICKET_PANEL.ReasonField:SetSize(250,nil)
+    SP_TICKET_PANEL.ReasonField:SetSortItems(false)
+    SP_TICKET_PANEL.ReasonField.hint = "Ticket Reason"
 
-    TICKET_PANEL.ReasonField:AddChoice("Freekill/Freeshoot")
-    TICKET_PANEL.ReasonField:AddChoice("NoRP/NoFearRP")
-    TICKET_PANEL.ReasonField:AddChoice("PropsBlock/PropsClimb")
-    TICKET_PANEL.ReasonField:AddChoice("NLR ( New Life Rule)")
-    TICKET_PANEL.ReasonField:AddChoice("Heavy Insultes")
-    TICKET_PANEL.ReasonField:AddChoice("Technical Question")
-    TICKET_PANEL.ReasonField:AddChoice("Other (not listed) ")
+    for _, v in ipairs(SP_CFG_TICKET_REASONS) do
+        SP_TICKET_PANEL.ReasonField:AddChoice(v)
+    end
 
-    TICKET_PANEL.ReasonField.Paint = function(self, width, height) drawEntry(self, width, height, 5, TICKET_PANEL.ReasonField) end
+    SP_TICKET_PANEL.ReasonField.Paint = function(self, width, height) drawEntry(self, width, height, 5, SP_TICKET_PANEL.ReasonField) end
 end
 
-function TICKET_PANEL.DrawEntry() 
-    TICKET_PANEL.TitleField = vgui.Create("DTextEntry", TICKET_PANEL.Frame)
-    TICKET_PANEL.TitleField:SetPos((PANEL_WIDTH*0.1)/2, PANEL_HEIGHT - (PANEL_HEIGHT*0.66))
-    TICKET_PANEL.TitleField:SetSize(250,nil)
-    TICKET_PANEL.TitleField.hint = "Ticket Title (max: 39)"
+function SP_TICKET_PANEL.DrawEntry() 
+    SP_TICKET_PANEL.TitleField = vgui.Create("DTextEntry", SP_TICKET_PANEL.Frame)
+    SP_TICKET_PANEL.TitleField:SetPos((PANEL_WIDTH*0.1)/2, PANEL_HEIGHT - (PANEL_HEIGHT*0.66))
+    SP_TICKET_PANEL.TitleField:SetSize(250,nil)
+    SP_TICKET_PANEL.TitleField.hint = "Ticket Title (max: 39)"
 
-    TICKET_PANEL.TitleField.OnLoseFocus = function(self) self.focus = false end
-    TICKET_PANEL.TitleField.OnGetFocus = function(self) focusEntry(self, TICKET_PANEL.TitleField) end
-    TICKET_PANEL.TitleField.Paint = function(self, width, height) drawEntry(self, width, height, height/7, TICKET_PANEL.TitleField) end
+    SP_TICKET_PANEL.TitleField.OnLoseFocus = function(self) self.focus = false end
+    SP_TICKET_PANEL.TitleField.OnGetFocus = function(self) focusEntry(self, SP_TICKET_PANEL.TitleField) end
+    SP_TICKET_PANEL.TitleField.Paint = function(self, width, height) drawEntry(self, width, height, height/7, SP_TICKET_PANEL.TitleField) end
 
-    TICKET_PANEL.SteamField = vgui.Create("DTextEntry", TICKET_PANEL.Frame)
-    TICKET_PANEL.SteamField:SetPos((PANEL_WIDTH*0.1)/2, PANEL_HEIGHT - (PANEL_HEIGHT*0.52))
-    TICKET_PANEL.SteamField:SetSize(250,nil)
-    TICKET_PANEL.SteamField.hint = "Player's SteamID (max: 17)"
+    SP_TICKET_PANEL.SteamField = vgui.Create("DTextEntry", SP_TICKET_PANEL.Frame)
+    SP_TICKET_PANEL.SteamField:SetPos((PANEL_WIDTH*0.1)/2, PANEL_HEIGHT - (PANEL_HEIGHT*0.52))
+    SP_TICKET_PANEL.SteamField:SetSize(250,nil)
+    SP_TICKET_PANEL.SteamField.hint = "Player's SteamID (max: 17)"
 
-    TICKET_PANEL.SteamField.OnLoseFocus = function(self) self.focus = false end
-    TICKET_PANEL.SteamField.OnGetFocus = function(self) focusEntry(self, TICKET_PANEL.SteamField) end
-    TICKET_PANEL.SteamField.Paint = function(self, width, height) drawEntry(self, width, height, height/7, TICKET_PANEL.SteamField) end
+    SP_TICKET_PANEL.SteamField.OnLoseFocus = function(self) self.focus = false end
+    SP_TICKET_PANEL.SteamField.OnGetFocus = function(self) focusEntry(self, SP_TICKET_PANEL.SteamField) end
+    SP_TICKET_PANEL.SteamField.Paint = function(self, width, height) drawEntry(self, width, height, height/7, SP_TICKET_PANEL.SteamField) end
 
-    TICKET_PANEL.InfoField = vgui.Create("DTextEntry", TICKET_PANEL.Frame)
-    TICKET_PANEL.InfoField:SetPos((PANEL_WIDTH*0.8)/2, PANEL_HEIGHT - (PANEL_HEIGHT*0.66))
-    TICKET_PANEL.InfoField:SetSize(420,nil)
-    TICKET_PANEL.InfoField:SetMultiline(true)
-    TICKET_PANEL.InfoField.hint = "Ticket Explanations (max: 355)"
+    SP_TICKET_PANEL.InfoField = vgui.Create("DTextEntry", SP_TICKET_PANEL.Frame)
+    SP_TICKET_PANEL.InfoField:SetPos((PANEL_WIDTH*0.8)/2, PANEL_HEIGHT - (PANEL_HEIGHT*0.66))
+    SP_TICKET_PANEL.InfoField:SetSize(420,nil)
+    SP_TICKET_PANEL.InfoField:SetMultiline(true)
+    SP_TICKET_PANEL.InfoField.hint = "Ticket Explanations (max: 355)"
 
-    TICKET_PANEL.InfoField.OnLoseFocus = function(self) self.focus = false end
-    TICKET_PANEL.InfoField.OnGetFocus = function(self) focusEntry(self, TICKET_PANEL.InfoField) end
-    TICKET_PANEL.InfoField.Paint = function(self, width, height) drawEntry(self, width, height, 5, TICKET_PANEL.InfoField) end
+    SP_TICKET_PANEL.InfoField.OnLoseFocus = function(self) self.focus = false end
+    SP_TICKET_PANEL.InfoField.OnGetFocus = function(self) focusEntry(self, SP_TICKET_PANEL.InfoField) end
+    SP_TICKET_PANEL.InfoField.Paint = function(self, width, height) drawEntry(self, width, height, 5, SP_TICKET_PANEL.InfoField) end
 end
 
-function TICKET_PANEL.DrawFrame()
-    TICKET_PANEL.Frame.Paint = function(self, width, height)
-        surface.SetDrawColor(SPANEL_ADDON_THEME.background)
+function SP_TICKET_PANEL.DrawFrame()
+    SP_TICKET_PANEL.Frame.Paint = function(self, width, height)
+        surface.SetDrawColor(SP_ADDON_THEME.background)
         surface.DrawRect(0, 0, width, height)
 
-        surface.SetDrawColor(SPANEL_ADDON_THEME.main)
+        surface.SetDrawColor(SP_ADDON_THEME.main)
         surface.DrawRect(0, 0, width, height/13)
 
-        surface.SetDrawColor(SPANEL_ADDON_THEME.main)
+        surface.SetDrawColor(SP_ADDON_THEME.main)
         surface.DrawRect(30, 60, width-60, height-140)
 
         local title = "Fill the fields to send us a ticket!"
@@ -214,44 +211,44 @@ function TICKET_PANEL.DrawFrame()
     end
 end
 
-function TICKET_PANEL.ClosePanel()
-    if(not TICKET_PANEL.IsPanelOpenned()) then 
-        chatLogger(LocalPlayer(), "Ticket Panel isn't openned!", SPANEL_ADDON_THEME.off_message)
+function SP_TICKET_PANEL.ClosePanel()
+    if(not SP_TICKET_PANEL.IsPanelOpenned()) then 
+        chatLogger(LocalPlayer(), "Ticket Panel isn't openned!", SP_ADDON_THEME.off_message)
         return 
     end
 
-    chatLogger(LocalPlayer(), "Closing Ticket Panel!", SPANEL_ADDON_THEME.off_message)
-    TICKET_PANEL.panelOpenned = false
+    chatLogger(LocalPlayer(), "Closing Ticket Panel!", SP_ADDON_THEME.off_message)
+    SP_TICKET_PANEL.panelOpenned = false
 
-    TICKET_PANEL.Frame:ShowCloseButton(false)
-    TICKET_PANEL.HandleFrameAnimation(0, 0, TICKET_PANEL.Frame)
-    TICKET_PANEL.HandleFrameResize(height, TICKET_PANEL.Frame)
+    SP_TICKET_PANEL.Frame:ShowCloseButton(false)
+    SP_TICKET_PANEL.HandleFrameAnimation(0, 0, SP_TICKET_PANEL.Frame)
+    SP_TICKET_PANEL.HandleFrameResize(height, SP_TICKET_PANEL.Frame)
 end
 
-function TICKET_PANEL.OpenPanel()
-    if(TICKET_PANEL.IsPanelOpenned()) then 
-        chatLogger(LocalPlayer(), "Ticket Panel is already openned!", SPANEL_ADDON_THEME.off_message)
+function SP_TICKET_PANEL.OpenPanel()
+    if(SP_TICKET_PANEL.IsPanelOpenned()) then 
+        chatLogger(LocalPlayer(), "Ticket Panel is already openned!", SP_ADDON_THEME.off_message)
         return 
     end
 
-    chatLogger(LocalPlayer(), "Openning Ticket Panel!", SPANEL_ADDON_THEME.on_message)
-    TICKET_PANEL.panelOpenned = true
+    chatLogger(LocalPlayer(), "Openning Ticket Panel!", SP_ADDON_THEME.on_message)
+    SP_TICKET_PANEL.panelOpenned = true
 
-    TICKET_PANEL.CreateFrame()
-    TICKET_PANEL.DrawFrame()
+    SP_TICKET_PANEL.CreateFrame()
+    SP_TICKET_PANEL.DrawFrame()
 
-    TICKET_PANEL.DrawEntry()
-    TICKET_PANEL.DrawCombo()
+    SP_TICKET_PANEL.DrawEntry()
+    SP_TICKET_PANEL.DrawCombo()
 
-    TICKET_PANEL.DisplayFrameButtons()
+    SP_TICKET_PANEL.DisplayFrameButtons()
 
-    TICKET_PANEL.HandleFrameAnimation(PANEL_WIDTH, PANEL_HEIGHT, TICKET_PANEL.Frame)
-    TICKET_PANEL.HandleFrameResize(height, TICKET_PANEL.Frame)
-    TICKET_PANEL.HandleFrameKeys(TICKET_PANEL.Frame)
+    SP_TICKET_PANEL.HandleFrameAnimation(PANEL_WIDTH, PANEL_HEIGHT, SP_TICKET_PANEL.Frame)
+    SP_TICKET_PANEL.HandleFrameResize(height, SP_TICKET_PANEL.Frame)
+    SP_TICKET_PANEL.HandleFrameKeys(SP_TICKET_PANEL.Frame)
 
-    TICKET_PANEL.Frame.OnClose = function()
+    SP_TICKET_PANEL.Frame.OnClose = function()
         if(keyPressed) then return end
         if(not LocalPlayer():GetNWBool("ticketInProgress")) then return end
-        TICKET_PANEL.ClosePanel()
+        SP_TICKET_PANEL.ClosePanel()
     end
 end
