@@ -1,6 +1,25 @@
 local rootDirectory = "spanel"
 local configDirectory = rootDirectory .. "/config"
 
+hook.Run("ConfigLoading")
+hook.Add("ConfigLoading", "SP_HK_CONFIG_LOADING", function()
+	if(SERVER) then
+		print()
+		print("------------------------------------")
+		print("-----------    " .. SP_ADDON_CONFIG.name .. "    -----------")
+		print("-------    " .. SP_ADDON_CONFIG.author .. "    -------")
+		print("-    " .. SP_ADDON_CONFIG.website .. "    -")
+		print("------------------------------------")
+		print()
+	
+		print("Loading " .. SP_ADDON_CONFIG.name .. " ver: " .. SP_ADDON_CONFIG.version .. " ..........")
+		print()
+	end
+end)
+
+AddCSLuaFile("spanel/spanel.lua")
+include("spanel/spanel.lua")
+
 local function AddFile( File, directory )
 	local prefix = string.lower( string.Left( File, 3 ) )
 	if (SERVER and prefix == "sv_") then
@@ -48,9 +67,8 @@ local function IncludeCfg(directory)
 end
 
 IncludeCfg(configDirectory)
-hook.Run("ConfigLoading")
 
-local function IncludeDir(directory)
+local function IncludeLua(directory)
 	directory = directory .. "/"
 
 	local files, directories = file.Find(directory .. "*", "LUA")
@@ -62,28 +80,13 @@ local function IncludeDir(directory)
 	end
 
 	for _, v in ipairs( directories) do
-		IncludeDir(directory .. v)
+		IncludeLua(directory .. v)
 	end
 end
 
-IncludeDir(rootDirectory)
+IncludeLua(rootDirectory)
+
 hook.Run("ConfigLoaded")
-
-hook.Add("ConfigLoading", "SP_HK_CONFIG_LOADING", function()
-	if(SERVER) then
-		print()
-		print("------------------------------------")
-		print("-----------    " .. SP_ADDON_CONFIG.name .. "    -----------")
-		print("-------    " .. SP_ADDON_CONFIG.author .. "    -------")
-		print("-    " .. SP_ADDON_CONFIG.website .. "    -")
-		print("------------------------------------")
-		print()
-	
-		print("Loading " .. SP_ADDON_CONFIG.name .. " ver: " .. SP_ADDON_CONFIG.version .. " ..........")
-		print()
-	end
-end)
-
 hook.Add("ConfigLoaded", "SP_HK_CONFIG_LOADED", function()
 	if(SERVER) then
 		print()

@@ -1,5 +1,5 @@
 local PANEL_WIDTH = ScrW()*0.15
-local PANEL_HEIGHT = ScrH()*0.1
+local PANEL_HEIGHT = ScrH()*0.2
 
 TICKET = {}
 
@@ -28,8 +28,8 @@ end
 
 function TICKET.DisplayFrameButtons()
     TICKET.ClaimTicket = vgui.Create("DButton", TICKET.Frame)
-    TICKET.ClaimTicket:SetPos(PANEL_WIDTH-(PANEL_WIDTH*0.35), PANEL_HEIGHT - (PANEL_HEIGHT*0.15) - (PANEL_HEIGHT*0.21))
-    TICKET.ClaimTicket:SetSize((PANEL_WIDTH*0.3),(PANEL_HEIGHT*0.15))
+    TICKET.ClaimTicket:SetPos(PANEL_WIDTH-(PANEL_WIDTH*0.35), PANEL_HEIGHT - (PANEL_HEIGHT*0.05) - (PANEL_HEIGHT*0.11))
+    TICKET.ClaimTicket:SetSize((PANEL_WIDTH*0.3),(PANEL_HEIGHT*0.05))
     TICKET.ClaimTicket:SetText("")
     TICKET.ClaimTicket.Paint = function(this, width, height)
         surface.SetDrawColor(SP_ADDON_THEME.main)
@@ -53,8 +53,8 @@ function TICKET.DisplayFrameButtons()
     end
 
     TICKET.CancelTicket = vgui.Create("DButton", TICKET.Frame)
-    TICKET.CancelTicket:SetPos(PANEL_WIDTH-(PANEL_WIDTH*0.35), PANEL_HEIGHT - (PANEL_HEIGHT*0.15) - (PANEL_HEIGHT*0.41))
-    TICKET.CancelTicket:SetSize((PANEL_WIDTH*0.3),(PANEL_HEIGHT*0.15))
+    TICKET.CancelTicket:SetPos(PANEL_WIDTH-(PANEL_WIDTH*0.35), PANEL_HEIGHT - (PANEL_HEIGHT*0.05) - (PANEL_HEIGHT*0.31))
+    TICKET.CancelTicket:SetSize((PANEL_WIDTH*0.3),(PANEL_HEIGHT*0.05))
     TICKET.CancelTicket:SetText("")
     TICKET.CancelTicket.Paint = function(this, width, height)
         surface.SetDrawColor(SP_ADDON_THEME.main)
@@ -87,10 +87,10 @@ function TICKET.DrawFrame()
         surface.DrawRect(0, 0, width, height/4.5)
 
         surface.SetDrawColor(SP_ADDON_THEME.main)
-        surface.DrawRect(30, 60, width-60, height-140)
-
-        surface.SetDrawColor(SP_ADDON_THEME.main)
-        surface.DrawRect(10, 10, width-60, height-140)
+        draw.SimpleText("Title - ".. TICKET.data.title, "roboto_font_13", 10, height*0.3, SP_ADDON_THEME.main, 0, 0)
+        draw.SimpleText("Reason - ".. TICKET.data.reason, "roboto_font_13", 10, height*0.5, SP_ADDON_THEME.main, 0, 0)
+        draw.SimpleText("SteamID - ".. TICKET.data.steamid, "roboto_font_13", 10, height*0.7, SP_ADDON_THEME.main, 0, 0)
+        draw.SimpleText("Details ".. TICKET.data.info, "roboto_font_13", 10, height*0.9, SP_ADDON_THEME.main, 0, 0)
     end
 end
 
@@ -105,7 +105,7 @@ function TICKET.ClosePanel()
     TICKET.Frame:Close()
 end
 
-function TICKET.OpenPanel(title, steamid, reason, info)
+function TICKET.OpenPanel()
     if(TICKET.IsPanelOpenned()) then 
         chatLogger(LocalPlayer(), "Ticket is already openned!", SP_ADDON_THEME.off_message)
         return 
@@ -120,10 +120,12 @@ function TICKET.OpenPanel(title, steamid, reason, info)
 end
 
 net.Receive("SP_NET_CL_REGISTER_TICKET", function(len, ply)
-    local title = net.ReadString()
-    local steamid = net.ReadString()
-    local reason = net.ReadString()
-    local info = net.ReadString()
+    TICKET.data = {}
     
-    TICKET.OpenPanel(title, steamid, reason, info)
+    TICKET.data.title = net.ReadString()
+    TICKET.data.steamid = net.ReadString()
+    TICKET.data.reason = net.ReadString()
+    TICKET.data.info = net.ReadString()
+    
+    TICKET.OpenPanel()
 end)
